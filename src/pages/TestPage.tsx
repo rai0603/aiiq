@@ -80,6 +80,37 @@ export default function TestPage() {
           </div>
         </div>
 
+        {/* PAIN POINTS */}
+        {test.painPoints && (
+          <div className="card-glass rounded-2xl p-6">
+            <h2 className="font-bold text-lg mb-4">你是否有這些困擾？</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {test.painPoints.map((p, i) => (
+                <div key={i} className="flex flex-col items-center text-center gap-3 bg-white/5 rounded-xl px-4 py-5">
+                  <span className="text-3xl">{p.icon}</span>
+                  <span className="text-sm text-gray-300 leading-snug">{p.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* HOW IT WORKS */}
+        {test.howItWorks && (
+          <div className="card-glass rounded-2xl p-6">
+            <h2 className="font-bold text-lg mb-4">測驗如何運作</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {test.howItWorks.map((step, i) => (
+                <div key={i} className="flex flex-col items-center text-center gap-2 bg-white/5 rounded-xl px-4 py-5">
+                  <span className="text-3xl">{step.icon}</span>
+                  <span className="font-semibold text-white text-sm">{step.title}</span>
+                  <span className="text-xs text-gray-400 leading-snug">{step.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* DIMENSIONS */}
         <div className="card-glass rounded-2xl p-6">
           <h2 className="font-bold text-lg mb-4">測驗維度</h2>

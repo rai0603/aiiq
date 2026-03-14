@@ -51,4 +51,6 @@ export interface TestConfig {
   price: number
   comingSoon?: boolean
   getBiasAnalysis?: (scores: Record<string, number>) => BiasAnalysis
+  painPoints?: { icon: string; text: string }[]
+  howItWorks?: { icon: string; title: string; desc: string }[]
 }

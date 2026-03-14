@@ -370,6 +370,230 @@ function AiiqPaidReport({ result, dimensions }: { result: TestResult; dimensions
   )
 }
 
+// FQ-specific paid report
+function FqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+
+  const dimContent: Record<string, { high: DimAnalysis; low: DimAnalysis }> = {
+    finance_basics: {
+      high: {
+        analysis: '你的理財基礎非常紮實，掌握了複利、緊急預備金、保險規劃等核心概念，這是所有進階財富管理的基石。相較於多數人在這個維度的模糊認知，你已建立了清晰的財務思維框架。',
+        tips: [
+          '建立個人資產負債表，每季更新一次，追蹤淨值成長',
+          '計算你的「儲蓄率」（每月儲蓄÷月收入），目標維持在20%以上',
+          '檢視你的保障型保險是否完整：壽險×10倍年薪+實支實付醫療險+失能險',
+        ],
+        roles: '個人理財顧問、財務教育工作者、任何需要指導他人建立財務基礎的角色',
+      },
+      low: {
+        analysis: '理財基礎是你最需要補強的維度。許多人在沒有穩固基礎的情況下就急於投資，結果往往事倍功半。從複利原理到緊急預備金，這些概念看似簡單，卻是財富積累最重要的地基。',
+        tips: [
+          '本週讀完《富爸爸窮爸爸》前半部，建立資產與負債的清晰概念',
+          '立即計算你現有的緊急預備金是否足夠3個月必要支出，不足請優先補足',
+          '了解你的保險覆蓋範圍，確保有基本的壽險和醫療保障',
+        ],
+        roles: '提升理財基礎後，在任何職位上都能更有效管理個人財務，對負責家庭財務規劃的人尤為重要',
+      },
+    },
+    investment: {
+      high: {
+        analysis: '你的投資邏輯在所有受測者中屬於頂尖水準。你理解指數基金的成本優勢、複利的威力，以及「在市場中的時間」遠比「判斷進出時機」重要。這些認知能讓你在大多數散戶犯錯時保持清醒。',
+        tips: [
+          '建立個人股票/基金的「投資備忘錄」，記錄買入理由和預期持有期限',
+          '定期閱讀巴菲特的年度股東信，深化長期投資思維',
+          '研究「因子投資」（Value/Quality/Momentum因子），探索指數投資的下一步',
+        ],
+        roles: '投資分析師、基金研究員、財富管理顧問、任何需要協助他人投資決策的專業人士',
+      },
+      low: {
+        analysis: '投資邏輯是你最需要強化的核心能力。許多散戶虧損的根本原因不是選錯股票，而是對投資的基本原理不夠了解——包括費用的複利侵蝕、情緒決策的代價，以及長期持有的重要性。',
+        tips: [
+          '今天就查閱「台灣50 ETF（0050）」的歷史報酬率，感受長期持有指數的力量',
+          '閱讀《投資最重要的事》（霍華·馬克斯）或《漫步華爾街》，建立系統性投資觀',
+          '設定一個小額定期定額投資（每月1,000元）開始實際操作，從做中學',
+        ],
+        roles: '建立投資邏輯後，對理財規劃師、投資顧問、或任何希望讓資產持續增長的人都有直接價值',
+      },
+    },
+    risk: {
+      high: {
+        analysis: '你的風險意識是保護財富的重要護盾。你能識別高報酬背後的真實風險，了解流動性的重要性，也知道如何避開常見的投資詐騙。這種清醒認識在市場狂熱時尤其珍貴。',
+        tips: [
+          '定期評估你投資組合的「最大可承受虧損」，確保不超過你的心理和財務底線',
+          '了解你所持有每類資產的流動性：從可即時變現到需要數月的光譜',
+          '設定「詐騙警報清單」：任何同時承諾高報酬、零風險、隨時提領的方案一律迴避',
+        ],
+        roles: '風險管理師、法遵專員、保險精算師、任何需要協助組織或個人識別和管理財務風險的角色',
+      },
+      low: {
+        analysis: '風險意識是財富積累中最重要的防守能力。一次重大的投資失誤（詐騙、過度集中、槓桿失控）可能讓多年的積累毀於一旦。強化這個維度不是讓你更保守，而是讓你在追求高報酬的同時有更好的防護。',
+        tips: [
+          '了解「龐氏騙局」的完整識別清單：任何承諾穩定高報酬且本金保障的投資，都需要極度謹慎',
+          '計算你的投資組合中流動性最差的資產占比，確保緊急資金需求有足夠的現金儲備',
+          '研究台灣金管會的「投資人保護」資源，了解合法金融機構的辨識方法',
+        ],
+        roles: '提升風險意識後，對財務安全至關重要的職業（醫療、法律、教育）以及需要做重要財務決策的所有人都有直接幫助',
+      },
+    },
+    tax: {
+      high: {
+        analysis: '你對稅務規劃的掌握讓你能保留更多辛苦賺來的投資報酬。在台灣，合理運用稅務工具（勞退自提、扣除額規劃、資本利得稅法規）能顯著提升你的實質報酬率，而你已走在正確的路上。',
+        tips: [
+          '計算你今年的所有可用扣除額：保險費、醫療費、房貸利息、捐贈等，確保沒有遺漏',
+          '評估是否增加勞退自提比例：每多提1%，每年節稅金額 = 月薪 × 1% × 12 × 適用稅率',
+          '開始規劃財富傳承：了解244萬年度贈與免稅額，思考如何透過多年規劃降低未來遺產稅',
+        ],
+        roles: '稅務顧問、會計師、財務規劃師、企業財務主管（CFO）、任何需要協助客戶進行稅務優化的專業人士',
+      },
+      low: {
+        analysis: '稅務規劃是最常被忽略但回報最高的財務技能之一。不了解台灣稅法，可能讓你在不知不覺中多繳了許多不必要的稅，或錯過了政府提供的合法節稅工具。',
+        tips: [
+          '立即查看你是否已申請「勞退自提」：登入勞保局網站，6分鐘內可完成設定，每年節稅效果顯著',
+          '下次報稅前，比較「標準扣除額」vs「列舉扣除額」哪個對你更有利，選較高的那個',
+          '閱讀財政部「個人綜合所得稅試算」工具，理解你的實際稅率和各類收入的課稅方式',
+        ],
+        roles: '了解稅務規劃後，對每一位納稅人都有直接價值，尤其是收入較高、有投資收益或計畫傳承財富的人',
+      },
+    },
+    psychology: {
+      high: {
+        analysis: '你對行為財務學偏誤的深入理解是你投資生涯的重要保護層。你能識別沉沒成本謬誤、確認偏誤、羊群效應等常見陷阱，這讓你在市場情緒最瘋狂的時刻，能保持理性決策。',
+        tips: [
+          '建立「投資決策日誌」：每次買賣都記錄決策理由，定期回顧自己是否有偏誤行為',
+          '設定預先停損點：在買入時就決定「若跌X%，我將重新評估」，避免情緒性持有',
+          '每次做重大投資決策前，主動尋找反方觀點——強制自己看看最看空這個投資的分析',
+        ],
+        roles: '行為財務顧問、投資組合經理、心理諮商師（財務方向）、任何需要協助他人克服情緒性投資決策的專業人士',
+      },
+      low: {
+        analysis: '心理偏誤是散戶系統性虧損最重要的原因之一。不是因為缺乏知識，而是因為大腦在面對金錢時會產生情緒反應，影響理性判斷。了解並克服這些偏誤，能讓你的投資決策品質大幅提升。',
+        tips: [
+          '這週練習：當你想買入某支股票前，先花20分鐘搜尋「它的缺點/風險/看空理由」',
+          '設定一個「24小時冷靜期」：任何>1萬元的投資決策，強制等24小時後再執行',
+          '閱讀《快思慢想》（丹尼爾·康納曼），系統了解人類決策中的認知偏誤',
+        ],
+        roles: '克服心理偏誤後，對所有投資者都有直接價值；對財務顧問、教練和需要幫助他人做理性決策的專業人士尤其重要',
+      },
+    },
+    allocation: {
+      high: {
+        analysis: '你對資產配置的理解讓你能構建更穩健的財富組合。你了解股債配置的對沖邏輯、再平衡的機制、生命週期投資法，以及不同資產類別在組合中的角色——這正是Brinson研究所顯示的，決定長期績效90%的核心因素。',
+        tips: [
+          '建立書面的「投資政策聲明（IPS）」：明確記錄目標配置比例、再平衡規則和投資原則',
+          '研究加入REITs（台灣可買美國REIT ETF如VNQ）和黃金ETF（如GLD），進一步多元化',
+          '每年1月執行再平衡：賣出超比例的資產，買入低比例的資產，保持風險水準一致',
+        ],
+        roles: '資產管理顧問、退休金規劃師、家族辦公室投資主管、任何需要協助設計長期財富管理策略的專業人士',
+      },
+      low: {
+        analysis: '資產配置是決定你投資組合長期績效的最重要因素，但卻是最容易被忽略的。許多人花大量時間選股，卻從未認真思考「股票、債券、現金應該各佔多少比例」這個更根本的問題。',
+        tips: [
+          '今天就做決定：你的股債比例是多少？（參考法則：股票比例 ≈ 110 減你的年齡）',
+          '開始了解台灣可買到的債券ETF：如00679B（美國30年期公債ETF），作為股票的平衡器',
+          '設定每年再平衡提醒：每年1月花1小時檢視並調整投資組合比例回到目標',
+        ],
+        roles: '建立資產配置概念後，對所有長期投資者都有直接價值；尤其對距退休還有10年以上的人，現在開始配置的效果最大',
+      },
+    },
+  }
+
+  return (
+    <div className="card-glass rounded-3xl p-8 space-y-6">
+      <h3 className="font-bold text-xl mb-2">💰 財商個人化分析</h3>
+
+      {/* 偏態分析 */}
+      {result.biasAnalysis && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📊</span>
+            <span className="font-semibold text-white">財商偏態分析</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto bg-emerald-500/20 text-emerald-300">
+              {result.biasAnalysis.label}
+            </span>
+          </div>
+          <p className="text-sm text-gray-300 leading-relaxed">{result.biasAnalysis.desc}</p>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-green-400">⚡</span>
+              <span className="text-xs font-semibold text-green-400 uppercase tracking-wide">立即可行的行動</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.immediate.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-green-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-blue-400">🎯</span>
+              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">未來提升方向與目標</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.future.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-blue-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+
+      {/* 各維度分析 */}
+      <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+        {dimensions.map(dim => {
+          const pct = result.dimensionScores[dim.id]?.percent ?? 0
+          const isHigh = pct >= 70
+          const level = pct >= 80 ? '優秀' : pct >= 60 ? '良好' : '需要加強'
+          const content = dimContent[dim.id]
+          const dimData: DimAnalysis = content
+            ? (isHigh ? content.high : content.low)
+            : {
+                analysis: `你在${dim.label}方面的表現${isHigh ? '良好' : '有提升空間'}。持續練習與學習，你將能進一步提升這個維度的能力。`,
+                tips: ['持續實踐相關技能', '尋找相關學習資源', '在實際情境中應用'],
+                roles: '根據你的行業，此能力有廣泛的應用場景',
+              }
+
+          return (
+            <div key={dim.id} className="bg-white/5 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>{dim.icon}</span>
+                <span className="font-semibold text-white">{dim.label}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${dim.color}20`, color: dim.color }}>
+                  {level}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 ml-auto">
+                  超越 {dimToPercentile(pct)}% 受測者
+                </span>
+              </div>
+              <p className="text-gray-300">{dimData.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">提升建議</div>
+                <ol className="space-y-1 list-none">
+                  {dimData.tips.map((tip, idx) => (
+                    <li key={idx} className="flex gap-2">
+                      <span className="shrink-0 font-bold" style={{ color: dim.color }}>{idx + 1}.</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="bg-white/5 rounded-lg px-3 py-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">適合職位　</span>
+                <span className="text-gray-300 text-xs">{dimData.roles}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ResultPage() {
   const { testId } = useParams<{ testId: string }>()
   const navigate = useNavigate()
@@ -519,6 +743,8 @@ export default function ResultPage() {
         ) : (
           testId === 'aiiq' ? (
             <AiiqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : testId === 'fq' ? (
+            <FqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : (
             <div className="card-glass rounded-3xl p-8 text-center space-y-4">
               <div className="text-4xl">🚧</div>
