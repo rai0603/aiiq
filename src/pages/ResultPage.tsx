@@ -818,6 +818,164 @@ function FqPaidReport({ result, dimensions }: { result: TestResult; dimensions: 
   )
 }
 
+// LQ-specific paid report
+function LqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+
+  const dimContent: Record<string, { high: DimAnalysis; low: DimAnalysis }> = {
+    communication: {
+      high: {
+        analysis: '你的溝通風格是你領導力的核心優勢。你懂得先理解再回應，能建立讓成員願意開口的心理安全感。下一步：進一步精通「教練式對話」，讓每次1:1都成為促進成員成長的催化劑。',
+        tips: ['在下次重要溝通前，先列出你想了解的3個開放式問題', '練習「複述核心意思」技巧：「如果我理解正確，你的意思是...」', '嘗試在每次給建議前，先問對方「你希望我給你建議，還是只是聽你說？」'],
+        roles: '適合角色：團隊Lead、HR夥伴、教練型主管',
+      },
+      low: {
+        analysis: '溝通是領導力最基礎也最直接影響團隊的能力。你的分數顯示在給予回饋、主動傾聽或建立心理安全感上有明顯的提升空間。溝通改善的效果往往在兩週內就能被團隊感受到。',
+        tips: ['本週在一次回饋中用SBI框架（情境-行為-影響）替代模糊評語', '下次1:1開始前，關掉電腦螢幕，讓成員感受到你完全的注意力', '學習非暴力溝通（NVC）的四步驟：觀察→感受→需求→請求'],
+        roles: '成長目標：從「指令型」升級為「對話型」領導者',
+      },
+    },
+    decision: {
+      high: {
+        analysis: '你具備高品質的決策思維，能識別認知偏誤並建立系統性的決策框架。進階挑戰：學習如何在時間壓力下維持決策品質，以及如何讓你的決策過程更透明，建立團隊對決策的信任。',
+        tips: ['建立個人的「決策日誌」，記錄重要決策的背景、選項和結果', '在重大決策前，主動邀請一位可能持不同意見的人來挑戰你的假設', '區分「可逆決策」和「不可逆決策」，前者快速授權，後者謹慎分析'],
+        roles: '適合角色：策略規劃師、部門主管、C-Level',
+      },
+      low: {
+        analysis: '決策品質是你最需要系統性提升的領導能力。常見問題包括：過度依賴直覺、害怕做出不完美的決策而拖延，或在群體壓力下從眾。決策能力是可以透過刻意練習提升的認知技能。',
+        tips: ['下次面對複雜決策時，用「利弊清單+加權」取代純直覺', '學習識別你自己最常出現的認知偏誤（確認偏誤？過度自信？損失規避？）', '在每次重要決策前問：「這是可逆的嗎？如果不可逆，我需要多少確定性才能行動？」'],
+        roles: '成長目標：建立個人的決策框架工具箱',
+      },
+    },
+    delegation: {
+      high: {
+        analysis: '你理解真正的授權意味著轉移決策權，而非只是分配任務。這讓你的團隊有更高的自主性和成長速度。進階目標：建立正式的繼任計畫，確保你的高授權文化在你離開後仍能延續。',
+        tips: ['為每位成員制定個人化的「成長授權計畫」，明確下一個可以交給他的責任', '在授權時使用「結果定義框架」：清楚說明成功的樣子，但不規定方法', '定期問自己：「我現在做的這件事，是否有成員比我更適合做？」'],
+        roles: '適合角色：成長型組織的部門主管、培育型Leader',
+      },
+      low: {
+        analysis: '授權能力的不足往往表現為微管理或事必躬親。這不只消耗你的時間，更阻礙了成員的成長和組織的擴展能力。改善授權的第一步，往往是面對「如果他做錯了怎麼辦？」的恐懼。',
+        tips: ['本週選一件你一直親力親為的事，明確授權給合適的成員，並只在他主動求助時介入', '使用「能力意願矩陣」評估每位成員，找出可以立即授權的工作', '建立週報或看板系統，讓你不需要直接介入也能掌握進度'],
+        roles: '成長目標：從「執行者」轉型為「能力倍增者」',
+      },
+    },
+    conflict: {
+      high: {
+        analysis: '你具備處理複雜衝突情境的成熟能力，能區分建設性和破壞性衝突，並以系統性的方式介入。進階挑戰：學習如何主動「創造」建設性衝突——鼓勵健康的異見，讓組織的決策更有韌性。',
+        tips: ['在下次重要決策會議中，主動指定一人扮演「惡魔代言人」（Devil\'s Advocate）', '建立衝突後的「復盤」文化：衝突解決後，問「這次讓我們學到什麼？」', '學習Patrick Lencioni的「健康衝突」框架，區分不信任導致的衝突和觀點碰撞導致的衝突'],
+        roles: '適合角色：跨部門協調者、組織發展（OD）專業人員',
+      },
+      low: {
+        analysis: '衝突處理能力的不足通常以「迴避衝突」或「過度干預但無效」兩種形式出現。迴避讓問題累積，最終以更嚴重的形式爆發；無效干預則讓你白費力氣且兩邊都不滿意。',
+        tips: ['下次遇到成員間的衝突，先分別進行1:1了解，再把雙方帶到一起討論', '準備一個你自己的「困難對話腳本」模板：事實陳述→感受→期望的改變→共同行動', '閱讀「Crucial Conversations」（關鍵對話），這是衝突處理最實用的實戰手冊'],
+        roles: '成長目標：從「衝突迴避者」升級為「衝突調解者」',
+      },
+    },
+    motivation: {
+      high: {
+        analysis: '你理解激勵的本質在於滿足個人的內在心理需求（自主性、勝任感、歸屬感），而非依賴外在獎懲。你能為不同成員設計個人化的激勵環境。進階目標：將你的激勵能力擴展到組織文化層面。',
+        tips: ['為每位成員記錄他們的「激勵偏好清單」：什麼讓他們最有動力？什麼讓他們最沮喪？', '在重要任務開始前，花5分鐘幫成員連結這個任務與他們個人目標的關係', '建立系統性的「小贏慶祝」文化，讓成員在長期專案中持續感受到進展'],
+        roles: '適合角色：高績效團隊的Leader、人才發展主管',
+      },
+      low: {
+        analysis: '激勵技巧的不足往往讓主管在薪資和晉升之外不知道如何提振成員士氣。研究顯示，金錢激勵在基本需求滿足後效果有限——真正持久的動力來自自主感、成長感和意義感。',
+        tips: ['本週對每位成員問一個問題：「你現在最期待在工作中達成什麼？」並記錄答案', '學習「赫茨伯格雙因素理論」：先消除工作中的不滿意因素，再創造激勵因素', '嘗試給一位成員一個超出他目前能力的挑戰，配合適當支援，觀察他的反應'],
+        roles: '成長目標：建立「人讓人想做事」的領導力',
+      },
+    },
+    self_awareness: {
+      high: {
+        analysis: '你具備高度的自我認知，能識別自己的情緒觸發器、盲點和行為模式對團隊的影響。這是領導力發展中最稀有也最有價值的能力。進階挑戰：把你的自我認知轉化為組織學習文化。',
+        tips: ['開始定期（每月）請信任的同儕給你一個你可能沒有意識到的行為模式回饋', '建立「情緒觸發器日誌」：記錄讓你情緒波動的事件，找出規律', '考慮與執行教練合作，把你的自我認知帶到更深的層次'],
+        roles: '適合角色：高成熟度的C-Level、組織文化推動者',
+      },
+      low: {
+        analysis: '自我認知是領導力所有維度的基礎——不了解自己的行為如何影響他人，所有的領導技巧都可能因為盲點而失效。「我沒有盲點」本身就是最大的盲點。這個維度的提升需要外部回饋，無法只靠自我反思。',
+        tips: ['立即行動：選一位你信任的成員，詢問：「我有什麼一直在做的事情，讓你覺得很難說出口？」', '每天花5分鐘寫「領導日記」：記錄今天讓你有情緒反應的一件事，以及你的反應', '進行正式的360度評估，了解你的成員、同儕和上司眼中的你'],
+        roles: '成長目標：從「無意識的習慣」走向「有意識的選擇」',
+      },
+    },
+  }
+
+  const bias = result.biasAnalysis
+
+  return (
+    <div className="space-y-8">
+      {bias && (
+        <div className="card-glass rounded-3xl p-8 border border-blue-500/20">
+          <h3 className="text-xl font-bold mb-2 text-blue-400">領導力偏態分析</h3>
+          <p className="text-sm text-gray-400 mb-4">根據你的六維得分分佈，識別你的主導領導風格與發展優先方向</p>
+          <div className="bg-blue-500/10 rounded-2xl p-5 mb-5">
+            <div className="font-bold text-lg text-blue-300 mb-1">{bias.label}</div>
+            <p className="text-gray-300 text-sm leading-relaxed">{bias.desc}</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm font-semibold text-green-400 mb-2">立即可行的行動</div>
+              <ul className="space-y-2">
+                {bias.immediate.map((item, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">→</span><span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-purple-400 mb-2">未來提升方向與目標</div>
+              <ul className="space-y-2">
+                {bias.future.map((item, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-300">
+                    <span className="text-purple-400 mt-0.5">◆</span><span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold text-white">六大領導力維度深度分析</h3>
+        {dimensions.map(dim => {
+          const score = result.dimensionScores[dim.id]
+          if (!score) return null
+          const isHigh = score.percent >= 70
+          const content = dimContent[dim.id]
+          if (!content) return null
+          const c = isHigh ? content.high : content.low
+          return (
+            <div key={dim.id} className="card-glass rounded-2xl p-6 border border-white/5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{dim.icon}</span>
+                  <div>
+                    <div className="font-bold text-white">{dim.label}</div>
+                    <div className="text-xs text-gray-400">{c.roles}</div>
+                  </div>
+                </div>
+                <div className={`text-sm font-semibold px-3 py-1 rounded-full ${isHigh ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                  {score.percent}% · {isHigh ? '優勢維度' : '成長機會'}
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 mb-4 leading-relaxed">{c.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-blue-400 mb-2">3個具體行動建議</div>
+                <ul className="space-y-1.5">
+                  {c.tips.map((tip, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-gray-300">
+                      <span className="text-blue-400 font-bold mt-0.5">{i + 1}.</span><span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // SMQ-specific paid report
 function SmqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
   type DimAnalysis = { analysis: string; tips: string[]; roles: string }
@@ -1195,6 +1353,8 @@ export default function ResultPage() {
             <FqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'eq' ? (
             <EqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : testId === 'lq' ? (
+            <LqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'smq' ? (
             <SmqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : (

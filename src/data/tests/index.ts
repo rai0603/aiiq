@@ -1,5 +1,5 @@
 import aiiq from './aiiq'
-import lq from './lq'
+import { lq } from './lq'
 import fq from './fq'
 import eq from './eq'
 import smq from './smq'
