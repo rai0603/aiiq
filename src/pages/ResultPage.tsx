@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { DIMENSION_LABELS } from '../data/questions'
-import type { Dimension } from '../data/questions'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getTest } from '../data/tests'
+import type { DimensionConfig } from '../data/tests'
 import type { TestResult } from '../utils/scoring'
 
 /** 根據維度百分比（0-100）估算相對百分位，假設平均值 55，SD 20 */
@@ -19,17 +19,16 @@ function dimToPercentile(pct: number): number {
   return Math.round(Math.min(99, Math.max(1, perc * 100)))
 }
 
-const DIMS: Dimension[] = ['ai_cognition', 'prompt', 'critical', 'knowledge_mgmt', 'ethics']
 const SITE_URL = 'https://aiiq.app'
 
-function ShareButtons({ result }: { result: TestResult }) {
+function ShareButtons({ result, testName, scoreLabel }: { result: TestResult; testName: string; scoreLabel: string }) {
   const [copied, setCopied] = useState(false)
 
-  const shareText = `🧠 我的 AI-IQ 指數是 ${result.aiiqScore} 分！超越全球 ${result.percentile}% 的受測者\n\n我的 AI 能力類型：${result.personalityType.icon} ${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 AI-IQ → ${SITE_URL}\n#AIIQ #AI素養 #人工智慧`
+  const shareText = `🧠 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n\n我的能力類型：${result.personalityType.icon} ${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 ${scoreLabel} → ${SITE_URL}\n#${scoreLabel} #IQSuite #能力測驗`
 
   const shareToFacebook = () => {
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(`我的 AI-IQ 指數是 ${result.aiiqScore} 分！超越全球 ${result.percentile}% 的受測者 ${result.personalityType.icon} ${result.personalityType.label} — 測測你的 AI-IQ → ${SITE_URL}`)}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(`我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者 ${result.personalityType.icon} ${result.personalityType.label} — 測測你的 ${scoreLabel} → ${SITE_URL}`)}`,
       '_blank', 'width=600,height=500'
     )
   }
@@ -52,7 +51,7 @@ function ShareButtons({ result }: { result: TestResult }) {
     <div className="card-glass rounded-2xl p-5">
       <div className="text-center mb-4">
         <div className="text-sm font-semibold text-gray-300 mb-1">分享你的結果</div>
-        <div className="text-xs text-gray-500">讓朋友也來測測 AI-IQ</div>
+        <div className="text-xs text-gray-500">讓朋友也來測測 {testName}</div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <button
@@ -105,9 +104,9 @@ function ShareButtons({ result }: { result: TestResult }) {
   )
 }
 
-function RadarChart({ scores }: { scores: Record<Dimension, number> }) {
+function RadarChart({ scores, dimensions }: { scores: Record<string, number>; dimensions: DimensionConfig[] }) {
   const cx = 150, cy = 150, r = 100
-  const angles = DIMS.map((_, i) => (i * 2 * Math.PI) / DIMS.length - Math.PI / 2)
+  const angles = dimensions.map((_, i) => (i * 2 * Math.PI) / dimensions.length - Math.PI / 2)
 
   const toXY = (angle: number, radius: number) => ({
     x: cx + radius * Math.cos(angle),
@@ -116,8 +115,8 @@ function RadarChart({ scores }: { scores: Record<Dimension, number> }) {
 
   const gridLevels = [20, 40, 60, 80, 100]
 
-  const dataPoints = DIMS.map((dim, i) => {
-    const pct = scores[dim] ?? 0
+  const dataPoints = dimensions.map((dim, i) => {
+    const pct = scores[dim.id] ?? 0
     return toXY(angles[i], (pct / 100) * r)
   })
 
@@ -125,7 +124,6 @@ function RadarChart({ scores }: { scores: Record<Dimension, number> }) {
 
   return (
     <svg viewBox="0 0 300 300" className="w-full max-w-xs mx-auto">
-      {/* Grid circles */}
       {gridLevels.map(lvl => (
         <polygon
           key={lvl}
@@ -138,29 +136,20 @@ function RadarChart({ scores }: { scores: Record<Dimension, number> }) {
           strokeWidth="1"
         />
       ))}
-
-      {/* Axis lines */}
       {angles.map((a, i) => {
         const end = toXY(a, r)
         return <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
       })}
-
-      {/* Data area */}
       <path d={dataPath} fill="rgba(99,102,241,0.25)" stroke="#6366f1" strokeWidth="2" />
-
-      {/* Data points */}
       {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="4" fill={DIMENSION_LABELS[DIMS[i]].color} />
+        <circle key={i} cx={p.x} cy={p.y} r="4" fill={dimensions[i].color} />
       ))}
-
-      {/* Labels */}
-      {DIMS.map((dim, i) => {
+      {dimensions.map((dim, i) => {
         const offset = 18
         const p = toXY(angles[i], r + offset)
-        const info = DIMENSION_LABELS[dim]
         return (
-          <text key={dim} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="#9ca3af">
-            {info.icon} {info.label}
+          <text key={dim.id} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="#9ca3af">
+            {dim.icon} {dim.label}
           </text>
         )
       })}
@@ -168,9 +157,8 @@ function RadarChart({ scores }: { scores: Record<Dimension, number> }) {
   )
 }
 
-function NormalDistBar({ score }: { score: number }) {
-  // score range 0-130, map to 0-100% for bar position
-  const pct = Math.min(100, Math.max(0, (score / 130) * 100))
+function NormalDistBar({ score, scoreMax }: { score: number; scoreMax: number }) {
+  const pct = Math.min(100, Math.max(0, (score / scoreMax) * 100))
   return (
     <div className="relative w-full h-24">
       <svg viewBox="0 0 300 80" className="w-full h-full" preserveAspectRatio="none">
@@ -187,26 +175,224 @@ function NormalDistBar({ score }: { score: number }) {
         <circle cx={pct * 3} cy="14" r="4" fill="#facc15" />
       </svg>
       <div className="absolute bottom-0 w-full flex justify-between text-xs text-gray-600 px-1">
-        <span>0</span><span>33</span><span>65</span><span>98</span><span>130</span>
+        <span>0</span>
+        <span>{Math.round(scoreMax * 0.25)}</span>
+        <span>{Math.round(scoreMax * 0.5)}</span>
+        <span>{Math.round(scoreMax * 0.75)}</span>
+        <span>{scoreMax}</span>
+      </div>
+    </div>
+  )
+}
+
+// AIIQ-specific paid report — dimension analysis cards
+function AiiqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  return (
+    <div className="card-glass rounded-3xl p-8 space-y-6">
+      <h3 className="font-bold text-xl mb-2">🤖 AI 個人化分析</h3>
+
+      {/* 偏態分析 */}
+      {result.biasAnalysis && (
+        <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📊</span>
+            <span className="font-semibold text-white">能力偏態分析</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto bg-indigo-500/20 text-indigo-300">
+              {result.biasAnalysis.label}
+            </span>
+          </div>
+          <p className="text-sm text-gray-300 leading-relaxed">{result.biasAnalysis.desc}</p>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-green-400">⚡</span>
+              <span className="text-xs font-semibold text-green-400 uppercase tracking-wide">立即可行的行動</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.immediate.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-green-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-blue-400">🎯</span>
+              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">未來提升方向與目標</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.future.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-blue-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+
+      {/* 各維度分析 */}
+      <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+        {dimensions.map(dim => {
+          const pct = result.dimensionScores[dim.id]?.percent ?? 0
+          const level = pct >= 80 ? '優秀' : pct >= 60 ? '良好' : '需要加強'
+
+          type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+          const suggestion: Record<string, DimAnalysis> = {
+            ai_cognition: pct >= 70 ? {
+              analysis: '你對AI的核心運作機制有清晰的理解，能分辨不同AI工具的特性差異，並知道何時該使用何種工具。這種「知其然也知其所以然」的認知，讓你在使用AI時不容易被幻覺誤導，也能有效評估AI輸出的可靠性。',
+              tips: [
+                '深入研究RAG與Fine-tuning的實際應用場景，了解何時用哪種方案',
+                '持續追蹤Arxiv、AI Alignment Forum等技術社群，掌握最新模型發展',
+                '嘗試實際串接API，從工程視角更深刻理解模型的能力邊界',
+              ],
+              roles: 'AI產品經理、技術顧問、AI應用開發者、數位轉型專案負責人、科技媒體編輯',
+            } : {
+              analysis: '對AI工具的認知仍停留在表面使用層次，尚未建立對LLM運作原理的系統性理解。這可能導致你在AI給出自信但錯誤的答案時難以察覺，或在選擇AI工具時缺乏判斷依據。',
+              tips: [
+                '從閱讀《人工智能：一種現代方法》或Andrej Karpathy的YouTube教學開始，建立基礎概念',
+                '親自嘗試ChatGPT、Claude、Gemini三款工具，比較它們在同一問題上的差異，培養工具敏感度',
+                '訂閱INSIDE、科技新報等科技媒體，每週花10分鐘關注AI新聞，逐步累積背景知識',
+              ],
+              roles: '建議在目前職位中主動承擔AI工具導入的試驗性任務，以實踐帶動理解',
+            },
+            prompt: pct >= 70 ? {
+              analysis: '你具備與AI高效溝通的核心能力，能精準表達需求、設定適當角色、控制輸出格式。這在AI工具普及的職場中是罕見的競爭優勢，能讓你從AI工具中榨取遠超一般用戶的價值。',
+              tips: [
+                '建立個人Prompt資料庫，按任務類型分類儲存，持續迭代優化',
+                '學習「思維鏈提示（CoT）」與「少樣本提示（Few-shot）」的進階技術',
+                '嘗試設計Multi-step Prompt工作流程，將複雜項目拆解為AI可逐步完成的子任務鏈',
+              ],
+              roles: 'AI提示工程師（Prompt Engineer）、AI內容策略師、行銷創意總監、教育訓練設計師',
+            } : {
+              analysis: '你對AI的使用仍停留在「問問題、收答案」的階段，尚未掌握主動引導AI輸出方向的技巧。這導致你獲得的AI回應往往是泛泛而談，難以直接應用。',
+              tips: [
+                '每次使用AI前，先明確3件事：角色（AI應扮演誰）、任務（具體要做什麼）、格式（希望如何呈現輸出）',
+                '參考「CRISPE框架」練習結構化Prompt',
+                '遇到不滿意的回答，在同一對話中給出具體的修改指令',
+              ],
+              roles: '任何需要大量文字產出的職位都能受益，尤其是文案、客服、教育、行政等領域',
+            },
+            critical: pct >= 70 ? {
+              analysis: '你具備在AI時代最稀缺的能力之一——對AI輸出保持健康的批判態度，並有能力驗證其準確性。在資訊氾濫的時代，你不會輕易被AI自信的語氣所迷惑。',
+              tips: [
+                '建立「AI輸出查核清單」：數字是否有來源？引用是否可查？預測是否有假設前提？',
+                '培養「要求AI扮演魔鬼代言人」的習慣，讓AI主動提出反方論點',
+                '學習基本的資訊素養技能，如識別網站可信度、使用Google Scholar查驗學術引用',
+              ],
+              roles: '研究分析師、新聞查核員（Fact-checker）、法律／醫療／金融等高風險決策領域',
+            } : {
+              analysis: '你目前可能傾向相信AI提供的資訊，較少主動查核其準確性。在AI能夠以極高自信捏造細節的今天，這是一個需要優先強化的能力。',
+              tips: [
+                '建立「三不原則」：不直接引用AI數字、不相信AI提供的學術引用未驗證、不把AI的醫療／法律建議視為最終答案',
+                '每週練習一次「反向驗證」：選一個AI給你的具體事實，花5分鐘找到原始資料確認',
+                '閱讀《Calling Bullshit》或TED的資訊素養課程，系統性建立批判思維',
+              ],
+              roles: '提升此能力後，對醫療、法律、金融、新聞、教育等高度資訊準確性工作者尤為重要',
+            },
+            knowledge_mgmt: pct >= 70 ? {
+              analysis: '你擅長利用AI作為知識管理的強大工具，能有效地整理、整合、應用大量資訊。你理解AI在知識管理中的角色——它是「知識加速器」而非「知識倉庫」。',
+              tips: [
+                '嘗試搭建個人RAG知識庫（如NotebookLM + Obsidian），讓你的知識資產可被AI即時檢索',
+                '設計「知識飛輪」工作流程：閱讀→AI摘要→與既有知識連結→輸出應用→複盤迭代',
+                '嘗試將AI知識管理系統導入團隊，建立共享知識庫',
+              ],
+              roles: '知識管理顧問、研發主管、教育課程設計師、智庫分析師、內容策略總監',
+            } : {
+              analysis: '你目前使用AI的方式較為零散，尚未建立系統性的AI輔助知識管理流程。大量閱讀和學習的成果，可能因為缺乏有效的整理方式而難以沉澱。',
+              tips: [
+                '從最簡單的「AI輔助摘要」開始：每讀完一篇文章，花1分鐘用AI生成3個重點，存入筆記工具',
+                '嘗試NotebookLM（Google免費工具），上傳你常用的參考文件，體驗RAG式知識庫的威力',
+                '建立「每週知識複盤」習慣：週五花15分鐘整理本週所學',
+              ],
+              roles: '任何需要持續學習的知識工作者都能從提升知識管理能力中受益',
+            },
+            ethics: pct >= 70 ? {
+              analysis: '你對AI倫理的敏感度讓你成為組織中難得的「負責任AI使用者」。你知道在哪些場景下AI使用涉及法律風險（如個資、著作權），也能識別算法偏見。',
+              tips: [
+                '深入了解台灣《個人資料保護法》與歐盟《AI法案（EU AI Act）》的核心條文',
+                '關注AI倫理研究機構（如AI Now Institute、中研院AI倫理研究）的最新報告',
+                '在你的組織中倡導建立「AI使用指引」，將負責任AI的概念推廣給同事',
+              ],
+              roles: 'AI政策分析師、企業法務／合規顧問、CSR主管、AI倫理研究員',
+            } : {
+              analysis: '你對AI使用的倫理與風險面向尚缺乏系統性認識。不了解這些邊界可能讓你或你的組織面臨法律風險（如個資外洩、著作權爭議）或社會代價。',
+              tips: [
+                '立即行動：查看你常用AI服務的隱私政策，確認哪些資料會被用於訓練，避免輸入公司機密或個資',
+                '學習辨識Deepfake的基本方法，並在社群媒體上養成「先核實再分享」的習慣',
+                '閱讀《AI倫理》相關入門書籍（如凱特·克勞馥的《Atlas of AI》）',
+              ],
+              roles: '提升此能力後，能在任何職位上更安全、負責任地使用AI工具',
+            },
+          }
+
+          const dimData = suggestion[dim.id] ?? {
+            analysis: `你在${dim.label}方面的表現${pct >= 70 ? '良好' : '有提升空間'}。持續練習與學習，你將能進一步提升這個維度的能力。`,
+            tips: ['持續實踐相關技能', '尋找相關學習資源', '在實際情境中應用'],
+            roles: '根據你的行業，此能力有廣泛的應用場景',
+          }
+
+          return (
+            <div key={dim.id} className="bg-white/5 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>{dim.icon}</span>
+                <span className="font-semibold text-white">{dim.label}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${dim.color}20`, color: dim.color }}>
+                  {level}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 ml-auto">
+                  超越 {dimToPercentile(pct)}% 受測者
+                </span>
+              </div>
+              <p className="text-gray-300">{dimData.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">提升建議</div>
+                <ol className="space-y-1 list-none">
+                  {dimData.tips.map((tip, idx) => (
+                    <li key={idx} className="flex gap-2">
+                      <span className="shrink-0 font-bold" style={{ color: dim.color }}>{idx + 1}.</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="bg-white/5 rounded-lg px-3 py-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">適合職位　</span>
+                <span className="text-gray-300 text-xs">{dimData.roles}</span>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
 export default function ResultPage() {
+  const { testId } = useParams<{ testId: string }>()
   const navigate = useNavigate()
   const [result, setResult] = useState<TestResult | null>(null)
   const [unlocked, setUnlocked] = useState(false)
   const [counting, setCounting] = useState(0)
 
+  const testConfig = testId ? getTest(testId) : undefined
+
   useEffect(() => {
-    const raw = sessionStorage.getItem('aiiq_result')
-    if (!raw) { navigate('/'); return }
+    if (!testId || !testConfig) {
+      navigate('/')
+      return
+    }
+    const raw = sessionStorage.getItem(`result_${testId}`)
+    if (!raw) {
+      navigate('/')
+      return
+    }
     const r: TestResult = JSON.parse(raw)
     setResult(r)
 
-    // Animate score count-up
-    const target = r.aiiqScore
+    const target = r.score
     let start = 0
     const step = Math.ceil((target - start) / 40)
     const timer = setInterval(() => {
@@ -215,14 +401,14 @@ export default function ResultPage() {
       if (start >= target) clearInterval(timer)
     }, 30)
     return () => clearInterval(timer)
-  }, [navigate])
+  }, [navigate, testId, testConfig])
 
-  if (!result) return null
+  if (!result || !testConfig) return null
 
   const dimScores = result.dimensionScores
   const scoreMap = Object.fromEntries(
-    DIMS.map(d => [d, dimScores[d]?.percent ?? 0])
-  ) as Record<Dimension, number>
+    testConfig.dimensions.map(d => [d.id, dimScores[d.id]?.percent ?? 0])
+  )
 
   const minutes = Math.floor(result.timeTaken / 60)
   const seconds = result.timeTaken % 60
@@ -231,7 +417,7 @@ export default function ResultPage() {
     <div className="min-h-screen bg-[#05081a] text-white">
       {/* NAV */}
       <nav className="flex items-center justify-between px-6 md:px-16 py-4 border-b border-white/5">
-        <span className="font-black gradient-text text-xl">AI-IQ</span>
+        <span className="font-black gradient-text text-xl">IQ Suite</span>
         <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-white transition-colors">
           ← 返回首頁
         </button>
@@ -243,12 +429,12 @@ export default function ResultPage() {
         <div className="card-glass rounded-3xl p-8 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20 pointer-events-none" />
           <div className="relative">
-            <div className="text-gray-400 text-sm mb-2">你的 AI-IQ 指數</div>
+            <div className="text-gray-400 text-sm mb-2">你的 {testConfig.scoreLabel} 指數</div>
             <div className="text-8xl font-black gradient-text mb-2">{counting}</div>
             <div className="text-gray-400 text-sm mb-4">
               超越全球 <span className="text-yellow-400 font-bold text-lg">{result.percentile}%</span> 的受測者
             </div>
-            <NormalDistBar score={result.aiiqScore} />
+            <NormalDistBar score={result.score} scoreMax={testConfig.scoreMax} />
             <div className="mt-4 flex items-center justify-center gap-2">
               <span className="text-3xl">{result.personalityType.icon}</span>
               <div className="text-left">
@@ -258,40 +444,42 @@ export default function ResultPage() {
             </div>
             <div className="text-xs text-gray-600 mt-4">
               完成時間 {minutes}:{seconds.toString().padStart(2, '0')} ·
-              答對 {result.answers.filter(a => a.correct).length} / {result.answers.length} 題
+              答對 {result.answers.filter((a: { correct: boolean }) => a.correct).length} / {result.answers.length} 題
             </div>
           </div>
         </div>
 
         {/* SHARE */}
-        <ShareButtons result={result} />
+        <ShareButtons result={result} testName={testConfig.name} scoreLabel={testConfig.scoreLabel} />
 
         {/* RADAR + DIM SCORES */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="card-glass rounded-2xl p-6">
-            <h3 className="font-bold mb-4 text-center">五大維度雷達圖</h3>
-            <RadarChart scores={unlocked ? scoreMap : Object.fromEntries(DIMS.map(d => [d, 0])) as Record<Dimension, number>} />
+            <h3 className="font-bold mb-4 text-center">{testConfig.dimensions.length} 大維度雷達圖</h3>
+            <RadarChart
+              scores={unlocked ? scoreMap : Object.fromEntries(testConfig.dimensions.map(d => [d.id, 0]))}
+              dimensions={testConfig.dimensions}
+            />
             {!unlocked && (
               <div className="text-center text-xs text-gray-500 mt-2">解鎖後顯示</div>
             )}
           </div>
           <div className="card-glass rounded-2xl p-6 space-y-4">
             <h3 className="font-bold mb-2">各維度分數</h3>
-            {DIMS.map(dim => {
-              const info = DIMENSION_LABELS[dim]
-              const score = dimScores[dim]
+            {testConfig.dimensions.map(dim => {
+              const score = dimScores[dim.id]
               const pct = score?.percent ?? 0
               const dimPerc = dimToPercentile(pct)
               return (
-                <div key={dim}>
+                <div key={dim.id}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <span className="flex items-center gap-1.5">
-                      <span>{info.icon}</span>
-                      <span className="text-gray-300">{info.label}</span>
+                      <span>{dim.icon}</span>
+                      <span className="text-gray-300">{dim.label}</span>
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">超越 <span className="text-yellow-400 font-semibold">{dimPerc}%</span></span>
-                      <span className="font-bold" style={{ color: info.color }}>
+                      <span className="font-bold" style={{ color: dim.color }}>
                         {unlocked ? `${pct}%` : '🔒'}
                       </span>
                     </div>
@@ -301,7 +489,7 @@ export default function ResultPage() {
                       className="h-full rounded-full transition-all duration-1000"
                       style={{
                         width: unlocked ? `${pct}%` : '0%',
-                        background: info.color,
+                        background: dim.color,
                       }}
                     />
                   </div>
@@ -311,14 +499,14 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* UNLOCK CTA */}
+        {/* UNLOCK CTA or PAID REPORT */}
         {!unlocked ? (
           <div className="rounded-3xl p-8 text-center" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12))', border: '1px solid rgba(139,92,246,0.4)' }}>
             <div className="text-2xl mb-2">🔓 解鎖完整報告</div>
             <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
               AI 個人化深度分析、各維度改善建議、<br />可分享的精美成果卡片
             </p>
-            <div className="text-4xl font-black mb-1">$0.99 <span className="text-lg text-gray-400 font-normal">USD</span></div>
+            <div className="text-4xl font-black mb-1">${testConfig.price} <span className="text-lg text-gray-400 font-normal">USD</span></div>
             <div className="text-gray-500 text-xs mb-6">一次性解鎖 · 永久保存</div>
             {/* TODO: Replace with Stripe checkout */}
             <button
@@ -329,190 +517,27 @@ export default function ResultPage() {
             </button>
           </div>
         ) : (
-          <div className="card-glass rounded-3xl p-8 space-y-6">
-            <h3 className="font-bold text-xl mb-2">🤖 AI 個人化分析</h3>
-
-            {/* 偏態分析 */}
-            <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📊</span>
-                <span className="font-semibold text-white">能力偏態分析</span>
-                <span className="text-xs px-2 py-0.5 rounded-full ml-auto bg-indigo-500/20 text-indigo-300">
-                  {result.biasAnalysis.label}
-                </span>
-              </div>
-              <p className="text-sm text-gray-300 leading-relaxed">{result.biasAnalysis.desc}</p>
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-green-400">⚡</span>
-                  <span className="text-xs font-semibold text-green-400 uppercase tracking-wide">立即可行的行動</span>
-                </div>
-                <ol className="space-y-1.5">
-                  {result.biasAnalysis.immediate.map((item, idx) => (
-                    <li key={idx} className="flex gap-2 text-sm text-gray-300">
-                      <span className="shrink-0 font-bold text-green-400">{idx + 1}.</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-blue-400">🎯</span>
-                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">未來提升方向與目標</span>
-                </div>
-                <ol className="space-y-1.5">
-                  {result.biasAnalysis.future.map((item, idx) => (
-                    <li key={idx} className="flex gap-2 text-sm text-gray-300">
-                      <span className="shrink-0 font-bold text-blue-400">{idx + 1}.</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+          testId === 'aiiq' ? (
+            <AiiqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : (
+            <div className="card-glass rounded-3xl p-8 text-center space-y-4">
+              <div className="text-4xl">🚧</div>
+              <h3 className="font-bold text-xl">完整分析即將推出</h3>
+              <p className="text-gray-400 text-sm">
+                我們正在為 {testConfig.name} 製作 AI 個人化深度分析報告，<br />
+                敬請期待！已解鎖的使用者將自動獲得完整版。
+              </p>
             </div>
-
-            {/* 各維度分析 */}
-            <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
-              {DIMS.map(dim => {
-                const info = DIMENSION_LABELS[dim]
-                const pct = dimScores[dim]?.percent ?? 0
-                const level = pct >= 80 ? '優秀' : pct >= 60 ? '良好' : '需要加強'
-
-                type DimAnalysis = {
-                  analysis: string
-                  tips: string[]
-                  roles: string
-                }
-                const suggestion: Record<Dimension, DimAnalysis> = {
-                  ai_cognition: pct >= 70 ? {
-                    analysis: '你對AI的核心運作機制有清晰的理解，能分辨不同AI工具的特性差異，並知道何時該使用何種工具。這種「知其然也知其所以然」的認知，讓你在使用AI時不容易被幻覺誤導，也能有效評估AI輸出的可靠性。',
-                    tips: [
-                      '深入研究RAG與Fine-tuning的實際應用場景，了解何時用哪種方案',
-                      '持續追蹤Arxiv、AI Alignment Forum等技術社群，掌握最新模型發展',
-                      '嘗試實際串接API，從工程視角更深刻理解模型的能力邊界',
-                    ],
-                    roles: 'AI產品經理、技術顧問、AI應用開發者、數位轉型專案負責人、科技媒體編輯',
-                  } : {
-                    analysis: '對AI工具的認知仍停留在表面使用層次，尚未建立對LLM運作原理的系統性理解。這可能導致你在AI給出自信但錯誤的答案時難以察覺，或在選擇AI工具時缺乏判斷依據。',
-                    tips: [
-                      '從閱讀《人工智能：一種現代方法》或Andrej Karpathy的YouTube教學開始，建立基礎概念',
-                      '親自嘗試ChatGPT、Claude、Gemini三款工具，比較它們在同一問題上的差異，培養工具敏感度',
-                      '訂閱INSIDE、科技新報等科技媒體，每週花10分鐘關注AI新聞，逐步累積背景知識',
-                    ],
-                    roles: '建議在目前職位中主動承擔AI工具導入的試驗性任務，以實踐帶動理解',
-                  },
-                  prompt: pct >= 70 ? {
-                    analysis: '你具備與AI高效溝通的核心能力，能精準表達需求、設定適當角色、控制輸出格式。這在AI工具普及的職場中是罕見的競爭優勢，能讓你從AI工具中榨取遠超一般用戶的價值。你可能已經發現，同樣的AI工具在你手中的產出品質，往往明顯優於他人。',
-                    tips: [
-                      '建立個人Prompt資料庫，按任務類型分類儲存，持續迭代優化',
-                      '學習「思維鏈提示（CoT）」與「少樣本提示（Few-shot）」的進階技術，應用於複雜推理任務',
-                      '嘗試設計Multi-step Prompt工作流程，將複雜項目拆解為AI可逐步完成的子任務鏈',
-                    ],
-                    roles: 'AI提示工程師（Prompt Engineer）、AI內容策略師、行銷創意總監、教育訓練設計師、AI工具培訓講師',
-                  } : {
-                    analysis: '你對AI的使用仍停留在「問問題、收答案」的階段，尚未掌握主動引導AI輸出方向的技巧。這導致你獲得的AI回應往往是泛泛而談，難以直接應用，需要大量手動修改。',
-                    tips: [
-                      '每次使用AI前，先明確3件事：角色（AI應扮演誰）、任務（具體要做什麼）、格式（希望如何呈現輸出）',
-                      '參考「CRISPE框架」（Capacity, Role, Insight, Statement, Personality, Experiment）練習結構化Prompt',
-                      '遇到不滿意的回答，不要重問，改為在同一對話中給出具體的修改指令（如「請讓語氣更正式、壓縮到200字以內」）',
-                    ],
-                    roles: '任何需要大量文字產出的職位都能受益，尤其是文案、客服、教育、行政等領域',
-                  },
-                  critical: pct >= 70 ? {
-                    analysis: '你具備在AI時代最稀缺的能力之一——對AI輸出保持健康的批判態度，並有能力驗證其準確性。在資訊氾濫的時代，你不會輕易被AI自信的語氣所迷惑，而會主動尋找原始來源、比對多方觀點。這種能力能有效保護你的決策品質，避免因AI幻覺導致的錯誤。',
-                    tips: [
-                      '建立「AI輸出查核清單」：數字是否有來源？引用是否可查？預測是否有假設前提？',
-                      '培養「要求AI扮演魔鬼代言人」的習慣，讓AI主動提出反方論點',
-                      '學習基本的資訊素養技能，如識別網站可信度、使用Google Scholar查驗學術引用',
-                    ],
-                    roles: '研究分析師、新聞查核員（Fact-checker）、法律／醫療／金融等高風險決策領域、學術研究者、商業分析師',
-                  } : {
-                    analysis: '你目前可能傾向相信AI提供的資訊，較少主動查核其準確性。在AI能夠以極高自信捏造細節的今天，這是一個需要優先強化的能力——特別是在涉及數據、引用、醫療、法律等高風險領域。',
-                    tips: [
-                      '建立「三不原則」：不直接引用AI數字（先查原始來源）、不相信AI提供的學術引用（先在Google Scholar驗證）、不把AI的醫療／法律建議視為最終答案（僅供參考）',
-                      '每週練習一次「反向驗證」：選一個AI給你的具體事實，花5分鐘找到原始資料確認',
-                      '閱讀《Calling Bullshit》（台譯：廢話偵測器）或TED的資訊素養課程，系統性建立批判思維',
-                    ],
-                    roles: '提升此能力後，對從事醫療、法律、金融、新聞、教育等需要高度資訊準確性的工作者尤為重要',
-                  },
-                  knowledge_mgmt: pct >= 70 ? {
-                    analysis: '你擅長利用AI作為知識管理的強大工具，能有效地整理、整合、應用大量資訊。你理解AI在知識管理中的角色——它是「知識加速器」而非「知識倉庫」，並知道如何提供正確的框架讓AI發揮最大價值。這讓你的學習效率和知識轉化能力遠高於一般人。',
-                    tips: [
-                      '嘗試搭建個人RAG知識庫（如NotebookLM + Obsidian），讓你的知識資產可被AI即時檢索',
-                      '設計「知識飛輪」工作流程：閱讀→AI摘要→與既有知識連結→輸出應用→複盤迭代',
-                      '嘗試將AI知識管理系統導入團隊，建立共享知識庫，放大個人能力的組織影響力',
-                    ],
-                    roles: '知識管理顧問、研發主管、教育課程設計師、智庫分析師、企業內訓規劃師、內容策略總監',
-                  } : {
-                    analysis: '你目前使用AI的方式較為零散，尚未建立系統性的AI輔助知識管理流程。大量閱讀和學習的成果，可能因為缺乏有效的整理方式而難以沉澱、轉化為可用的知識資產。',
-                    tips: [
-                      '從最簡單的「AI輔助摘要」開始：每讀完一篇文章，花1分鐘用AI生成3個重點，存入筆記工具',
-                      '嘗試NotebookLM（Google免費工具），上傳你常用的參考文件，體驗RAG式知識庫的威力',
-                      '建立「每週知識複盤」習慣：週五花15分鐘整理本週所學，請AI幫你找出跨資訊的關聯主題',
-                    ],
-                    roles: '任何需要持續學習的知識工作者都能從提升知識管理能力中受益，特別是研究、教育、諮詢、管理等領域',
-                  },
-                  ethics: pct >= 70 ? {
-                    analysis: '你對AI倫理的敏感度讓你成為組織中難得的「負責任AI使用者」。你知道在哪些場景下AI使用涉及法律風險（如個資、著作權），也能識別算法偏見，並在決策中保持「人在回路」的意識。在AI治理議題日益重要的今天，這是一個極具前瞻性的競爭優勢。',
-                    tips: [
-                      '深入了解台灣《個人資料保護法》與歐盟《AI法案（EU AI Act）》的核心條文，建立法規基礎',
-                      '關注AI倫理研究機構（如AI Now Institute、中研院AI倫理研究）的最新報告',
-                      '在你的組織中倡導建立「AI使用指引」，將負責任AI的概念推廣給同事',
-                    ],
-                    roles: 'AI政策分析師、企業法務／合規顧問、CSR（企業社會責任）主管、AI倫理研究員、政府數位部門、人力資源主管（AI招募合規）',
-                  } : {
-                    analysis: '你對AI使用的倫理與風險面向尚缺乏系統性認識。在AI工具快速普及的今天，不了解這些邊界可能讓你或你的組織面臨法律風險（如個資外洩、著作權爭議）或社會代價（如散布假訊息、算法歧視）。',
-                    tips: [
-                      '立即行動：查看你常用AI服務（ChatGPT／Claude）的隱私政策，確認哪些資料會被用於訓練，避免輸入公司機密或個資',
-                      '學習辨識Deepfake的基本方法，並在社群媒體上養成「先核實再分享」的習慣',
-                      '閱讀《AI倫理》相關入門書籍（如凱特·克勞馥的《Atlas of AI》），建立對AI社會影響的宏觀認識',
-                    ],
-                    roles: '提升此能力後，能在任何職位上更安全、負責任地使用AI工具，對從事人力資源、法律、醫療、教育、媒體等高社會責任領域的工作者尤為重要',
-                  },
-                }
-
-                const dimData = suggestion[dim]
-
-                return (
-                  <div key={dim} className="bg-white/5 rounded-xl p-4 space-y-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span>{info.icon}</span>
-                      <span className="font-semibold text-white">{info.label}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${info.color}20`, color: info.color }}>
-                        {level}
-                      </span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 ml-auto">
-                        超越 {dimToPercentile(pct)}% 受測者
-                      </span>
-                    </div>
-                    <p className="text-gray-300">{dimData.analysis}</p>
-                    <div>
-                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">提升建議</div>
-                      <ol className="space-y-1 list-none">
-                        {dimData.tips.map((tip, idx) => (
-                          <li key={idx} className="flex gap-2">
-                            <span className="shrink-0 font-bold" style={{ color: info.color }}>{idx + 1}.</span>
-                            <span>{tip}</span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                    <div className="bg-white/5 rounded-lg px-3 py-2">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">適合職位　</span>
-                      <span className="text-gray-300 text-xs">{dimData.roles}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          )
         )}
 
         {/* RETAKE */}
         <div className="text-center pb-8">
           <button
-            onClick={() => { sessionStorage.removeItem('aiiq_result'); navigate('/quiz') }}
+            onClick={() => {
+              sessionStorage.removeItem(`result_${testId}`)
+              navigate(`/${testId}/quiz`)
+            }}
             className="text-gray-400 hover:text-white text-sm transition-colors underline"
           >
             重新測驗（題目將隨機更換）

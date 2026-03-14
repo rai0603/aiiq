@@ -1,29 +1,43 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { buildTestQuestions, DIMENSION_LABELS } from '../data/questions'
-import type { Question } from '../data/questions'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getTest, buildQuizQuestions } from '../data/tests'
+import type { Question } from '../data/tests'
 import { calculateResult } from '../utils/scoring'
 import type { Answer } from '../utils/scoring'
 
-const TOTAL_TIME = 30 * 60 // 30 minutes in seconds
-
 export default function QuizPage() {
+  const { testId } = useParams<{ testId: string }>()
   const navigate = useNavigate()
-  const [questions] = useState<Question[]>(() => buildTestQuestions())
+
+  const testConfig = testId ? getTest(testId) : undefined
+
+  const [questions] = useState<Question[]>(() => {
+    if (!testConfig) return []
+    return buildQuizQuestions(testConfig)
+  })
+
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [selected, setSelected] = useState<number | null>(null)
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME)
+  const [timeLeft, setTimeLeft] = useState(() => (testConfig?.timeLimitMinutes ?? 30) * 60)
   const [startTime] = useState(Date.now())
   const [animating, setAnimating] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Redirect if test not found
+  useEffect(() => {
+    if (!testConfig) {
+      navigate('/')
+    }
+  }, [testConfig, navigate])
+
   const submitTest = useCallback((finalAnswers: Answer[]) => {
+    if (!testConfig) return
     const timeTaken = Math.round((Date.now() - startTime) / 1000)
-    const result = calculateResult(questions, finalAnswers, timeTaken)
-    sessionStorage.setItem('aiiq_result', JSON.stringify(result))
-    navigate('/result')
-  }, [questions, startTime, navigate])
+    const result = calculateResult(questions, finalAnswers, timeTaken, testConfig)
+    sessionStorage.setItem(`result_${testId}`, JSON.stringify(result))
+    navigate(`/${testId}/result`)
+  }, [questions, startTime, navigate, testConfig, testId])
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -39,16 +53,19 @@ export default function QuizPage() {
     return () => clearInterval(timerRef.current!)
   }, [answers, submitTest])
 
+  if (!testConfig || questions.length === 0) return null
+
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60)
     const sec = s % 60
     return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
   }
 
+  const totalTime = testConfig.timeLimitMinutes * 60
   const q = questions[current]
-  const dimInfo = DIMENSION_LABELS[q.dimension]
+  const dimInfo = testConfig.dimensions.find(d => d.id === q.dimension)
   const progress = ((current) / questions.length) * 100
-  const timePercent = (timeLeft / TOTAL_TIME) * 100
+  const timePercent = (timeLeft / totalTime) * 100
 
   const handleSelect = (idx: number) => {
     if (animating) return
@@ -62,8 +79,8 @@ export default function QuizPage() {
     const answer: Answer = {
       questionId: q.id,
       selected,
-      correct: selected === q.correct,
-      points: selected === q.correct ? q.points : 0,
+      correct: selected === q.answer,
+      points: selected === q.answer ? q.points : 0,
     }
     const newAnswers = [...answers, answer]
 
@@ -79,21 +96,13 @@ export default function QuizPage() {
     }, 400)
   }
 
-  const difficultyColor = {
-    easy: 'text-green-400 bg-green-400/10',
-    medium: 'text-yellow-400 bg-yellow-400/10',
-    hard: 'text-red-400 bg-red-400/10',
-  }[q.difficulty]
-
-  const difficultyLabel = { easy: '基礎', medium: '進階', hard: '挑戰' }[q.difficulty]
-
   return (
     <div className="min-h-screen bg-[#05081a] text-white flex flex-col">
 
       {/* TOP BAR */}
       <div className="sticky top-0 z-10 bg-[#05081a]/95 backdrop-blur border-b border-white/5 px-4 md:px-8 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-          <span className="font-black gradient-text text-lg">AI-IQ</span>
+          <span className="font-black gradient-text text-lg">{testConfig.name}</span>
 
           {/* Timer */}
           <div className={`flex items-center gap-2 text-sm font-mono font-bold ${timeLeft < 300 ? 'text-red-400' : 'text-white'}`}>
@@ -128,15 +137,16 @@ export default function QuizPage() {
         <div className="w-full max-w-2xl">
 
           {/* Dimension badge */}
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-xl">{dimInfo.icon}</span>
-            <span className="text-sm font-medium" style={{ color: dimInfo.color }}>{dimInfo.label}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${difficultyColor}`}>{difficultyLabel}</span>
-          </div>
+          {dimInfo && (
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-xl">{dimInfo.icon}</span>
+              <span className="text-sm font-medium" style={{ color: dimInfo.color }}>{dimInfo.label}</span>
+            </div>
+          )}
 
           {/* Question */}
           <div className="card-glass rounded-2xl p-6 md:p-8 mb-6">
-            <p className="text-lg md:text-xl font-medium leading-relaxed">{q.question}</p>
+            <p className="text-lg md:text-xl font-medium leading-relaxed">{q.text}</p>
           </div>
 
           {/* Options */}
