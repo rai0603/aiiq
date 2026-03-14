@@ -976,6 +976,112 @@ function LqPaidReport({ result, dimensions }: { result: TestResult; dimensions: 
   )
 }
 
+// OSQ-specific paid report
+function OsqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+  const dimContent: Record<string, { high: DimAnalysis; low: DimAnalysis }> = {
+    risk_assessment: {
+      high: { analysis: '你的風險評估能力讓你能在出發前就識別並管理大多數可預見的危險。你了解殘餘風險的存在，能做出負責任的 GO/NO-GO 決策。進階目標：學習帶領團隊進行集體風險評估，讓安全文化在你的隊伍中擴散。', tips: ['建立活動前的標準化風險評估清單（依活動類型客製化）', '每次活動後進行簡短的「Debrief」：什麼按計畫進行？什麼需要調整？', '研究台灣山域事故案例報告，提升對台灣特定風險情境的敏感度'], roles: '適合角色：嚮導、戶外教練、活動領隊' },
+      low: { analysis: '⚠️ 風險評估是所有安全決策的起點。你的得分顯示在系統性識別和管理風險上有重要缺口，建議在進行高風險活動前，先從有認證嚮導帶領的活動開始，逐步建立評估能力。', tips: ['開始使用「行程計畫書」框架，強迫系統思考所有風險點', '學習風險矩陣：每個風險依「發生機率」×「嚴重後果」評分', '在活動中練習觀察並說出你看到的潛在危險，讓它成為習慣'], roles: '優先學習：GO/NO-GO 決策框架、能力邊界評估' },
+    },
+    first_aid: {
+      high: { analysis: '你的急救知識是最關鍵的安全能力，你在這個維度的高分代表你在緊急狀況下能採取正確的初步處置，大幅提升傷患的存活機會。強烈建議取得正式認證，讓知識成為可驗證的技能。', tips: ['報名 WFA（荒野急救員）認證課程，把知識轉化為實際技能', '在你的急救包中練習徒手完成 DR. ABC 評估流程，直到成為肌肉記憶', '每年複習急救指南更新（CPR 指南每5年更新一次）'], roles: '適合角色：隊伍急救負責人、戶外教練、搜救志工' },
+      low: { analysis: '⚠️ 急救知識得分低於安全基準。這是六個維度中最需要立即行動的警示。戶外環境的意外往往在專業救援到達前的黃金時間決定結果——你的急救知識可能是隊友生死的關鍵。', tips: ['⚠️ 在下次戶外活動前完成急救課程（台灣急救協會/WFA）', '至少學會：DR. ABC評估、止血加壓法、低體溫症識別與處置', '購買並熟悉戶外急救手冊（WEMS/WMI出版），隨身攜帶在急救包中'], roles: '緊急行動：立即報名急救課程' },
+    },
+    equipment: {
+      high: { analysis: '你對裝備有全面的理解，知道不同活動需要不同的裝備配置，且了解裝備失效或錯誤使用的風險。進階目標：學習裝備維護和現場修復技能，讓你在裝備故障時能自救。', tips: ['建立個人的「裝備維護日曆」，定期檢查關鍵安全裝備的狀態', '學習一項現場急修技能（如救生衣充氣系統維護/繩索結確認）', '研究各類裝備的認證標準（CE/UIAA/ISO），理解不同認證的實際意義'], roles: '適合角色：裝備顧問、戶外店員、安全教育者' },
+      low: { analysis: '裝備知識的缺口常以「帶了錯誤的裝備」或「正確的裝備但錯誤的用法」的形式出現。在台灣的活動環境中（高溫潮濕、急流地形、海況複雜），裝備判斷錯誤的後果尤其嚴重。', tips: ['向你的活動社群或認證嚮導諮詢「這個活動我真正需要什麼裝備」', '學習救生衣的選擇和正確穿著方式（不同活動對應不同的PFD等級）', '參加一次有嚮導帶領的活動，觀察專業人員的裝備配置邏輯'], roles: '優先學習：PFD選擇、頭盔必要性、通訊設備配置' },
+    },
+    weather: {
+      high: { analysis: '你對台灣的天氣模式有很好的理解，能在複雜的天氣信號中識別真正的危險。台灣的天氣變化比多數國家更劇烈，你的天氣判讀能力是保護自己和隊友的重要屏障。', tips: ['學習閱讀數值天氣預報（NWP）模型，如GFS和ECMWF，取得比官方預報更早的信息', '建立你常去地點的「微氣候筆記」，記錄在地天氣規律', '學習雲圖判讀，能從衛星雲圖預判2-4小時後的天氣變化'], roles: '適合角色：嚮導、海上活動教練、山地搜救隊員' },
+      low: { analysis: '天氣判讀薄弱是台灣戶外活動事故的重要原因之一——台灣的午後雷陣雨、颱風外圍環流和東北季風造成的海況快速變化，都需要較專業的判讀能力。', tips: ['學習辨識積雨雲（Cumulonimbus）的視覺特徵，這是雷陣雨30分鐘預警的關鍵信號', '在颱風季（5-11月），出發前必看「颱風動態」和溪流水位，而非只看天氣預報', '在進行水上活動前，學習浪況預報讀取（Surf-Forecast的週期和湧浪方向）'], roles: '優先學習：颱風外圍環流判讀、午後雷陣雨模式、浪況週期' },
+    },
+    emergency: {
+      high: { analysis: '你在緊急應變上有完整的知識框架，了解 STOP 原則、MOB 處置和後送決策的時機。把這些知識轉化為肌肉記憶需要實際演練——在真正的緊急狀況發生前，你應該已經在腦中模擬過每個場景。', tips: ['定期與你的隊友進行「桌面演練（Tabletop Exercise）」：「如果現在XXX發生了，我們怎麼做？」', '學習使用你攜帶的求救設備（衛星通訊器/PLB），包括在緊急情況下如何啟動', '研究台灣的搜救啟動流程，了解何時呼叫119、何時聯絡山地管制站'], roles: '適合角色：活動領隊、搜救志工、戶外教練' },
+      low: { analysis: '緊急處置能力的缺口在平時不會被發現，但在真正的緊急狀況中差異顯著。STOP原則、MOB處置和就地等待的判斷，是在壓力下容易被腎上腺素推著做出錯誤決定的關鍵時刻。', tips: ['把 STOP 原則記憶為口訣，並在模擬場景中練習執行（迷路時強迫自己停下來）', '學習「就地等待 vs 自行撤退」的決策框架，在出發前就和隊友討論清楚', '在水上活動前練習拋出救生環的動作，讓它成為反射動作而非需要思考的操作'], roles: '優先學習：STOP原則、MOB處置流程、後送決策時機' },
+    },
+    regulations: {
+      high: { analysis: '你對台灣戶外活動的法規框架有清楚的認識，這讓你在規劃活動時能避免法規風險，也能在需要時正確引用法規保護自己。', tips: ['持續追蹤水域遊憩活動管理辦法的更新（地方政府有時會調整管制水域名單）', '學習商業活動帶領的法規要求，如果你有教學或帶隊收費的打算', '了解戶外活動保險的種類（個人意外險/商業責任險），確保你的活動有適當保障'], roles: '適合角色：商業嚮導、戶外教練、活動企劃' },
+      low: { analysis: '法規常識的缺口通常不直接造成意外，但會在意外發生後帶來額外的法律和財務風險。台灣的國家公園入山申請、水域管制規定和商業活動法規，都值得花一次時間系統了解。', tips: ['下次登山前完成入山申請流程（林務局申請網站），了解整個系統的運作', '查詢你常去的水域是否在「水域遊憩活動管理辦法」的管制範圍內', '學習台灣緊急救援電話系統：119/110/1199 各自的使用時機'], roles: '優先學習：入山申請系統、緊急救援電話、水域管制規定' },
+    },
+  }
+  const bias = result.biasAnalysis
+  return (
+    <div className="space-y-8">
+      {bias && (
+        <div className="card-glass rounded-3xl p-8 border border-green-500/20">
+          <h3 className="text-xl font-bold mb-2 text-green-400">安全意識偏態分析</h3>
+          <p className="text-sm text-gray-400 mb-4">根據你的六維得分分佈，識別你的安全能力優先提升方向</p>
+          <div className="bg-green-500/10 rounded-2xl p-5 mb-5">
+            <div className="font-bold text-lg text-green-300 mb-1">{bias.label}</div>
+            <p className="text-gray-300 text-sm leading-relaxed">{bias.desc}</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm font-semibold text-green-400 mb-2">立即可行的行動</div>
+              <ul className="space-y-2">
+                {bias.immediate.map((item, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">→</span><span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-emerald-400 mb-2">未來提升方向與目標</div>
+              <ul className="space-y-2">
+                {bias.future.map((item, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-300">
+                    <span className="text-emerald-400 mt-0.5">◆</span><span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold text-white">六大安全維度深度分析</h3>
+        {dimensions.map(dim => {
+          const score = result.dimensionScores[dim.id]
+          if (!score) return null
+          const isHigh = score.percent >= 70
+          const content = dimContent[dim.id]
+          if (!content) return null
+          const c = isHigh ? content.high : content.low
+          return (
+            <div key={dim.id} className="card-glass rounded-2xl p-6 border border-white/5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{dim.icon}</span>
+                  <div>
+                    <div className="font-bold text-white">{dim.label}</div>
+                    <div className="text-xs text-gray-400">{c.roles}</div>
+                  </div>
+                </div>
+                <div className={`text-sm font-semibold px-3 py-1 rounded-full ${isHigh ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {score.percent}% · {isHigh ? '安全優勢' : '需要強化'}
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 mb-4 leading-relaxed">{c.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-green-400 mb-2">3個具體行動建議</div>
+                <ul className="space-y-1.5">
+                  {c.tips.map((tip, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-gray-300">
+                      <span className="text-green-400 font-bold mt-0.5">{i + 1}.</span><span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // SMQ-specific paid report
 function SmqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
   type DimAnalysis = { analysis: string; tips: string[]; roles: string }
@@ -1355,6 +1461,8 @@ export default function ResultPage() {
             <EqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'lq' ? (
             <LqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : testId === 'outdoor' ? (
+            <OsqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'smq' ? (
             <SmqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : (

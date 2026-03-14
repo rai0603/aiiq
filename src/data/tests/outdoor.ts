@@ -1,36 +1,144 @@
 import type { TestConfig } from './types'
 
-const outdoor: TestConfig = {
+export const outdoor: TestConfig = {
   id: 'outdoor',
   name: '戶外運動安全力測驗',
-  scoreLabel: '安全指數',
-  scoreMax: 100,
-  tagline: '你的戶外安全意識達標了嗎？',
-  category: '戶外 / 運動安全',
-  categoryColor: '#ef4444',
+  scoreLabel: 'OSQ',
+  scoreMax: 130,
+  tagline: '你的戶外安全判斷力，足以保護自己和隊友嗎？',
+  category: '戶外安全',
+  categoryColor: 'from-green-700 to-emerald-500',
   icon: '🏔️',
-  description: '評估你在水上、登山、極限運動等戶外場景的安全判斷與技能素養',
-  dimensions: [
-    { id: 'risk_assess', label: '風險評估', icon: '⚠️', color: '#ef4444', weight: 0.20 },
-    { id: 'first_aid',   label: '急救知識', icon: '🏥', color: '#dc2626', weight: 0.20 },
-    { id: 'equipment',   label: '裝備判斷', icon: '🎒', color: '#f87171', weight: 0.17 },
-    { id: 'weather',     label: '天氣判讀', icon: '🌤️', color: '#fca5a5', weight: 0.17 },
-    { id: 'emergency',   label: '緊急處置', icon: '🆘', color: '#fee2e2', weight: 0.13 },
-    { id: 'regulations', label: '法規常識', icon: '📋', color: '#fecaca', weight: 0.13 },
-  ],
-  questions: [],
-  personalityTypes: [
-    { id: 'expert',    label: '戶外安全達人', icon: '🏆', desc: '具備專業戶外安全知識，能有效應對各種危機。', minScore: 85, maxScore: 100 },
-    { id: 'advanced',  label: '進階戶外者',   icon: '🧗', desc: '安全意識良好，仍有進步空間。',              minScore: 68, maxScore: 84  },
-    { id: 'moderate',  label: '一般戶外愛好者', icon: '🥾', desc: '基礎知識具備，建議加強急救與緊急處置。', minScore: 50, maxScore: 67  },
-    { id: 'beginner',  label: '初學者',       icon: '🌱', desc: '建議先系統學習戶外安全知識再出發。',        minScore: 30, maxScore: 49  },
-    { id: 'risky',     label: '高風險使用者', icon: '🚨', desc: '安全意識需大幅提升，建議先接受正式訓練。', minScore: 0,  maxScore: 29  },
-  ],
-  timeLimitMinutes: 10,
-  targetAudience: ['水上運動', '登山', '戶外教練'],
-  difficulty: 5,
-  price: 0.99,
-  comingSoon: true,
-}
+  description: '40題 × 10分鐘，從風險評估到緊急處置，評測你在水上、登山和極限運動中的真實安全素養',
+  timeLimitMinutes: 12,
+  targetAudience: ['水上運動愛好者', '登山者', '溯溪者', '戶外教練', '攀岩者'],
+  difficulty: 3,
+  price: 299,
+  comingSoon: false,
 
-export default outdoor
+  dimensions: [
+    { id: 'risk_assessment', label: '風險評估', icon: '⚠️', color: '#dc2626', weight: 0.22 },
+    { id: 'first_aid',       label: '急救知識', icon: '🩺', color: '#2563eb', weight: 0.25 },
+    { id: 'equipment',       label: '裝備判斷', icon: '🎒', color: '#7c3aed', weight: 0.18 },
+    { id: 'weather',         label: '天氣判讀', icon: '🌤️', color: '#0891b2', weight: 0.15 },
+    { id: 'emergency',       label: '緊急處置', icon: '🚨', color: '#ea580c', weight: 0.13 },
+    { id: 'regulations',     label: '法規常識', icon: '📋', color: '#16a34a', weight: 0.07 },
+  ],
+
+  questions: [
+    // 風險評估 Q1-Q7
+    { id: 'osq_01', dimension: 'risk_assessment', text: '戶外活動前進行「行程計畫書」填寫並告知緊急聯絡人，最核心的安全意義是？', options: ['讓活動聽起來更正式，增加團隊信心', '確保若發生失聯或事故，救援人員能迅速掌握預計路線、人員組成、裝備與回報時間，大幅縮短搜救啟動時間', '這是某些活動的法規要求，不做會被罰款', '行程計畫書主要用於事後檢討，不影響救援效率'], answer: 1, points: 2, isCore: true },
+    { id: 'osq_02', dimension: 'risk_assessment', text: '「風險矩陣（Risk Matrix）」在戶外活動規劃中的使用方式是？', options: ['風險矩陣是給企業用的管理工具，戶外活動不需要', '把每個潛在危害依「發生機率」和「後果嚴重性」兩個維度評估，優先處理高機率×高嚴重性的風險，中等風險建立應對計劃，低風險接受並監控', '只要參加過幾次活動就能憑直覺評估所有風險', '風險矩陣需要專業認證才能使用'], answer: 1, points: 3, isCore: true },
+    { id: 'osq_03', dimension: 'risk_assessment', text: '「超越能力邊界（Out-of-Bound）」在戶外安全教育中最重要的意涵是？', options: ['能力邊界是固定的，無法透過訓練改變', '冒險精神最重要，能力邊界只是心理限制', '能力邊界不只是技術能力，還包含當下的體力狀態、心理狀態、裝備完整度和環境條件——任何一個維度不足都可能讓既往安全的活動變成危險情境', '只要有夥伴陪同，超出能力邊界也是安全的'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_04', dimension: 'risk_assessment', text: '戶外活動中「第三方影響（Third-party Impact）」的風險考量是什麼？', options: ['第三方影響只需要在商業活動中考量', '只要對自己安全就不需要考慮他人', '你的活動和決策可能對救援人員、其他活動者和環境造成影響——強行通過危險路段不只危及自己，也可能迫使救援人員冒險救援，是成熟戶外安全意識的一部分', '法律上只有傷害他人才需要負責'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_05', dimension: 'risk_assessment', text: '「殘餘風險（Residual Risk）」的概念在戶外活動管理中是什麼意思？', options: ['殘餘風險代表活動設計有缺陷，應重新規劃', '殘餘風險是零，代表活動完全安全', '在採取所有合理安全措施後，仍然存在的、無法完全消除的風險——所有戶外活動都有殘餘風險，承認這一點是誠實的安全文化的基礎', '殘餘風險由保險公司負責，活動主辦方不需要考慮'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_06', dimension: 'risk_assessment', text: '在多人戶外隊伍中，「最弱成員原則（Weakest Link Principle）」應如何理解？', options: ['最弱的成員應該留在家裡，不適合戶外活動', '隊伍的整體能力由最弱的成員決定，規劃活動時應確保最弱的成員能夠安全完成整個行程，而非只考慮平均能力', '最弱成員由最強成員帶著走，不影響整體安全', '最弱成員的困難是個人問題，其他隊員不需要負責'], answer: 1, points: 2, isCore: true },
+    { id: 'osq_07', dimension: 'risk_assessment', text: '「GO/NO-GO決策框架」在戶外活動起始點的最佳應用時機是？', options: ['GO/NO-GO只在出發前決定一次就夠了', 'GO/NO-GO應在出發前、活動中關鍵節點（如天氣惡化、有人受傷）以及每天行程開始時持續評估，任何時候條件不符合安全標準就應執行NO-GO', '只有隊長才能執行GO/NO-GO決策，成員不需要參與', 'GO/NO-GO是法律用語，一般戶外活動不需要這個框架'], answer: 1, points: 2, isCore: true },
+
+    // 急救知識 Q8-Q14
+    { id: 'osq_08', dimension: 'first_aid', text: '在戶外環境發現有人失去意識，正確的急救初始評估順序（DR. ABC）是？', options: ['直接開始CPR', '先確認Danger（危險）→ Response（反應）→ Airway（呼吸道）→ Breathing（呼吸）→ Circulation（循環），確保自身和傷患安全後再介入', '先找手機拍照記錄', '先叫其他人來看'], answer: 1, points: 2, isCore: true },
+    { id: 'osq_09', dimension: 'first_aid', text: '「溺水（Drowning）」的現代急救知識中，哪個認識最容易被忽略？', options: ['溺水者一定會大聲呼救，容易被識別', '溺水者呼叫後應立即跳下水救援', '真實的溺水往往是安靜的——人在水面掙扎時會本能地用手壓水維持頭部高度，無法揮手求救或大聲呼叫；且溺水者從掙扎到沉入水下可能只有20-60秒', '只要在淺水區就不會發生溺水'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_10', dimension: 'first_aid', text: '戶外環境的「止血」處理，正確的優先順序是？', options: ['先用消毒水清潔傷口再止血', '先拍照記錄傷口狀況', '直接加壓止血（Direct Pressure）是第一優先，使用乾淨布料或紗布持續按壓至少5-10分鐘，不要中途放開查看——止血優先於傷口清潔', '立刻使用止血帶（Tourniquet）是最好的方法'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_11', dimension: 'first_aid', text: '「低體溫症（Hypothermia）」的識別和初步處理，以下哪個說法最正確？', options: ['低體溫症只發生在冬天或高山', '給低體溫症患者喝酒可以幫助回溫', '低體溫症可在台灣夏季的溪流或海洋中發生（水溫25°C以下即可能導致），初期症狀是顫抖和判斷力下降，嚴重時停止顫抖（警訊），處理原則是逐步複溫並避免快速加熱', '低體溫症患者需要立刻進行劇烈運動來產生熱量'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_12', dimension: 'first_aid', text: '戶外急救中「脊椎損傷（Spinal Injury）」的懷疑與處置，正確的原則是？', options: ['若傷患能自行移動就代表沒有脊椎損傷', '只有從高處墜落才需要懷疑脊椎損傷', '任何涉及頸部或背部的撞擊、高處墜落、水中撞擊，都應懷疑脊椎損傷，在確認安全前保持傷患的脊椎中立位（避免扭曲），並避免不必要的移動', '若傷患喊痛就一定有脊椎損傷，不喊痛就沒有'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_13', dimension: 'first_aid', text: '台灣的緊急救援電話，戶外活動人員最應熟知的組合是？', options: ['只需要記住119', '只需要記住110', '119（消防/急救）、110（警察）、1199（海巡署，海上緊急救援）、以及活動地區的山地管制站電話——不同類型的緊急狀況對應不同的救援體系', '在山上打任何電話都撥不通，記電話沒有用'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_14', dimension: 'first_aid', text: '「AED（自動體外去顫器）」的正確使用認知是？', options: ['AED只有醫療專業人員才能使用', 'AED會偵測心律，若不需要電擊會自動不放電，一般人可以安全使用，且越早使用存活率越高（每延誤1分鐘存活率下降7-10%）', 'AED使用前必須先完成CPR至少30分鐘', 'AED只在心臟病患者身上有效'], answer: 1, points: 3, isCore: true },
+
+    // 裝備判斷 Q15-Q20
+    { id: 'osq_15', dimension: 'equipment', text: '個人救生衣（PFD，Personal Flotation Device）的選擇，最關鍵的原則是？', options: ['越貴的救生衣越安全，品牌是最重要的考量', '救生衣只在不會游泳的人身上才有用', '救生衣必須依活動類型選擇適合的浮力等級（如衝浪板活動vs.急流划船vs.海上活動的需求不同），且必須合身穿著（鬆緊適中）——一件穿不好的救生衣比不穿更危險（因為給你假安全感）', '只要穿著救生衣就保證不會溺水'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_16', dimension: 'equipment', text: '登山用「十件必備裝備（Ten Essentials）」的核心目的是？', options: ['讓登山者顯得更專業', '這只是古老的傳統，現代GPS手機已可取代大部分裝備', '十件必備裝備設計為確保在任何緊急情況（如迷路、天氣劇變、受傷）下，登山者能在野外過夜並等待救援——缺少任何一件都可能在緊急情況下造成致命後果', '只有在遠征登山時才需要攜帶所有十件裝備'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_17', dimension: 'equipment', text: '水上運動中「安全繩（Leash）」的使用，最容易造成反效果的情境是？', options: ['在任何水上情況下使用Leash都是安全的', 'Leash在衝浪板和SUP活動中不需要使用', 'Leash在急流/白水環境（如泛舟、溪降）可能成為致命危險——若繩索糾纏到岩石或水下障礙物，反而讓使用者無法脫困；白水運動的安全繩設計完全不同（使用快拆式投擲繩袋）', 'Leash越長越安全'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_18', dimension: 'equipment', text: '登山杖（Trekking Poles）的主要功能和正確使用高度是？', options: ['登山杖主要是拍照時的道具', '登山杖越長越好，有利於支撐體重', '登山杖能減少膝蓋30-40%的衝擊力（尤其下坡），同時增加平衡和穩定性；正確高度為手持時手肘呈90度角，下坡時適當調長，上坡時調短', '登山杖只有老人和體弱者才需要使用'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_19', dimension: 'equipment', text: '「頭盔（Helmet）」在各類戶外活動中，哪個場景最常被低估其必要性？', options: ['頭盔在所有戶外活動中都是過度保護', '頭盔只在自行車和滑雪活動中有必要', '溪降（Canyoning）和泛舟活動中，水流撞擊岩石或被水流推撞到岩壁的頭部撞擊事故是主要死亡/重傷原因之一，頭盔是絕對必要的基本裝備', '頭盔戴了以後活動的視野變差，安全風險反而增加'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_20', dimension: 'equipment', text: '在海上/水上活動中，「通訊設備」的備份配置最重要的考量是？', options: ['只帶手機就夠了，現代手機很耐用', '帶越多設備越安全', '應依活動區域配置多層次通訊：手機（有訊號區域）→ 無線電（VHF Marine Radio，海上5公里有效範圍）→ 衛星通訊器（EPIRB/PLB/Garmin inReach，全球覆蓋，無訊號盲區）——每一層是下一層的備份', '只要告知別人行程，不需要攜帶通訊設備'], answer: 2, points: 3, isCore: true },
+
+    // 天氣判讀 Q21-Q26
+    { id: 'osq_21', dimension: 'weather', text: '台灣山區的「午後雷陣雨」模式，對戶外活動計畫的影響是？', options: ['午後雷陣雨在台灣春夏季節每天都一定發生，所以不需要特別關注', '只要戴雨衣就能繼續活動，雷陣雨不影響安全', '台灣春末至秋季（4-10月），午後雷陣雨發生率極高，雷擊是高山戶外活動的顯著致命風險——計畫應在午前完成稜線或高點的通過，下午提前撤至低點或遮蔽處', '午後雷陣雨只影響低海拔地區，高山不會有雷擊'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_22', dimension: 'weather', text: '「浪況判讀（Wave Reading）」在水上活動中，哪個要素最常被低估？', options: ['浪高是唯一重要的浪況指標', '網路浪況預報永遠準確，照預報行動即可', '週期（Wave Period）和浪向比浪高更能決定實際危險程度——長週期（12秒以上）的大湧浪即使浪高僅1米，其能量和危險性遠超短週期（6秒）的2米浪；且湧浪受海底地形影響，在礁岩、淺灘處會突然增大和破碎', '只要不在浪最大的地方就是安全的'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_23', dimension: 'weather', text: '「風寒效應（Wind Chill Factor）」對戶外安全的實際意義是？', options: ['風寒效應只是讓人感覺更冷，不影響實際體溫損失', '在山上只要穿夠厚就不需要考慮風寒效應', '風速會大幅加速體表熱量散失，相同氣溫下風速越大，體感溫度遠低於實際溫度，進而加速低體溫症發生——台灣高山的強風（尤其東北季風期）配合低氣溫，風寒效應導致的低體溫危險在夏季也可能發生', '只有極地環境才需要考慮風寒效應'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_24', dimension: 'weather', text: '台灣颱風季對戶外活動的影響，正確的安全決策標準是？', options: ['颱風遠離台灣就不影響戶外安全', '颱風後的好天氣是最佳戶外活動時機', '颱風外圍環流和颱風後一週的溪流洪水（即使當地晴天）是台灣最危險的戶外情境——溯溪和溪降活動在颱風前後10天內應完全停止，高山稜線在颱風外圍雲系靠近時也應撤退', '只要氣象局沒有發布颱風警報就是安全的'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_25', dimension: 'weather', text: '「霧（Fog）」在山域或海上活動的危險，最常被忽視的面向是？', options: ['霧只影響視覺，只要有GPS就完全安全', '霧在山區只有秋冬季節才出現', '濃霧在山域會完全消除視覺定向能力（即使有GPS也可能因地形複雜而迷失），且可能在幾分鐘內形成；在海上，霧讓你對其他船隻不可見（碰撞風險）且讓電子設備失效——遇霧的正確決策是停止或大幅放慢前進，等待能見度改善', '霧是天氣現象，與安全無關'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_26', dimension: 'weather', text: '查看「氣象預報」進行戶外活動決策，最重要的補充資訊來源是？', options: ['氣象預報已經足夠，不需要其他來源', '只看風速就夠了', '除了中央氣象署的正式預報外，應結合：活動地點的即時觀測數據（山頂氣象站/海象觀測站）、有經驗的在地嚮導或船長的判斷、以及歷史天氣模式的了解（如特定山頭的微氣候特性）——氣象預報的解析度有限，在地知識能填補關鍵空白', '相信社群媒體上其他人的天氣回報就夠了'], answer: 2, points: 2, isCore: true },
+
+    // 緊急處置 Q27-Q32
+    { id: 'osq_27', dimension: 'emergency', text: '在戶外發生「迷路（Lost）」時，「STOP原則」的正確執行順序是？', options: ['繼續前進，一定可以找到出路', '大聲呼救，等待他人來找你', 'Stop（停下來，不要繼續前進）→ Think（評估自身狀況和已知資訊）→ Observe（觀察周遭地形和環境）→ Plan（制定行動計劃，優先選擇等待救援而非盲目前進）——大多數迷路悲劇源於繼續移動使位置更難預測', '立刻跑回原路，速度越快越好'], answer: 1, points: 2, isCore: true },
+    { id: 'osq_28', dimension: 'emergency', text: '「大規模傷亡事件（Mass Casualty Incident, MCI）」在戶外活動中（如山難、沉船），最有效的初期處置是？', options: ['優先救助最嚴重的傷患', '先數清楚有多少人受傷', '使用簡易檢傷分類（START Triage）快速評估所有傷患，標記為紅色（立即）/黃色（延遲）/綠色（輕傷）/黑色（無法救治）——有限資源應集中在紅色傷患，這比優先救最重傷者更能最大化整體存活率', '等待專業救援人員到達再開始任何處置'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_29', dimension: 'emergency', text: '「緊急後送（Emergency Evacuation）」的決策中，什麼情況下應就地等待而非自行撤退？', options: ['只要可以走路就應該自行撤退', '天黑後絕對不能移動，必須等到天亮', '若移動本身可能加重傷勢（疑似脊椎傷、不穩定骨折、嚴重低體溫）、環境條件使移動危險（黑暗+陡峭地形+惡劣天氣）、且已觸發搜救機制並明確告知位置——就地等待救援往往是最安全的選擇', '只要還有體力就應該繼續移動尋求幫助'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_30', dimension: 'emergency', text: '水上活動中「人員落水（Man Overboard, MOB）」的即時處置步驟是？', options: ['立刻跳下水救人', '大聲呼叫後等待他人來處理', '立刻呼叫「MOB」告知所有人→指派一人持續目視落水者不轉移視線→啟動GPS/MOB功能標記位置→拋出浮具（救生環/浮索）→調整船位接近→謹慎撈救避免二次落水', '先用手機拍照記錄位置'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_31', dimension: 'emergency', text: '「沙灘/水域救生（Beach/Water Rescue）」中，「RID原則」最重要的意涵是？', options: ['RID代表救生員必須冒著生命危險直接救援', 'RID代表救援不需要任何預防措施', 'Recognition（辨識溺水信號）→ Identification（確認需要援助）→ Decision（決定最安全的救援方式）——使用延伸物>投擲物>划行>游泳救援（最後且最危險的選項）', 'RID代表救援後的報告義務'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_32', dimension: 'emergency', text: '「獨自活動（Solo）」的戶外安全，哪個認識最為關鍵？', options: ['有經驗的人單獨活動沒有危險', '只要帶手機就足夠了', '獨自活動讓小意外（輕微扭傷、設備故障、短暫迷向）變成嚴重緊急事件——所有戶外風險計算在獨自活動時必須以更保守的標準重新評估，技術難度和客觀危險應顯著降低，且通訊和定位設備的可靠性要求大幅提升', '只要告訴一個朋友，獨自活動就是安全的'], answer: 2, points: 2, isCore: true },
+
+    // 法規常識 Q33-Q38
+    { id: 'osq_33', dimension: 'regulations', text: '台灣「國家公園法」對山岳地區的登山活動規範，最重要的基本知識是？', options: ['台灣的國家公園完全禁止登山活動', '在國家公園內登山不需要任何申請', '進入特定山岳地區（如百岳主要路線）需依規定申請入山許可和國家公園入園許可，未申請者可能面臨罰款，且在未申請情況下發生意外，可能影響搜救啟動的效率', '申請入山許可只是形式，沒有實際安全意義'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_34', dimension: 'regulations', text: '台灣「水域遊憩活動管理辦法」規定，在特定管制水域進行水上活動的基本要求是？', options: ['台灣所有水域活動都完全自由，不需要任何許可', '只有商業活動需要申請許可，個人活動不需要', '在特定管制水域（如部分海灘、河口、水庫）進行水上活動可能需要向主管機關申請，且依活動類型有不同規範（如救生員部署要求、禁止區域），事前查詢是責任義務', '水域遊憩活動法規只適用於有商業收費的活動'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_35', dimension: 'regulations', text: '台灣「救助法」和「海難救助」相關知識中，在海上發現有人需要救援，有哪些基本法律義務？', options: ['救助他人是個人選擇，沒有法律義務', '只有職業救生員才有救助義務', '台灣刑法對遺棄罪和不救助罪有規範，在能力範圍內見到他人有生命危險而不救助可能承擔法律責任；海商法亦規定船長在不嚴重危及本船的情況下有救助義務——「我不會游泳」不免除提供浮具、呼叫救援等非游泳救助義務', '救助他人之後若對方受傷，救助者需要負擔賠償責任'], answer: 2, points: 3, isCore: true },
+    { id: 'osq_36', dimension: 'regulations', text: '在台灣進行「商業戶外活動帶領」（如收費登山嚮導、水上活動教練），最重要的法規和保險義務是？', options: ['只要自己有技術能力就可以從事商業帶領，不需要其他資格', '商業活動只需要基本的保險就夠了', '依活動類型不同，商業帶領者需具備相關主管機關認可的證照、投保公共意外責任險，且在部分地區需向主管機關登記——不符合規定者可能面臨主管機關取締和民事賠償風險', '學員簽署切結書後，帶領者就完全免責'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_37', dimension: 'regulations', text: '「無人機（UAV/Drone）」在戶外活動中的法規使用，最容易觸犯的規定是？', options: ['在台灣任何地方都可以自由飛無人機', '只要不在機場附近就可以飛', '在國家公園、軍事管制區、人口密集區飛行無人機需要事先申請許可；25公克以上的無人機需要註冊；在部分自然保護區飛行可能干擾野生動物且違反生態保育法規——未申請許可可能面臨最高罰款150,000元（民用航空法）', '無人機法規只針對商業用途，休閒使用不受限制'], answer: 2, points: 2, isCore: true },
+    { id: 'osq_38', dimension: 'regulations', text: '台灣「野生動物保育法」對戶外活動者的影響，以下哪個認識最為關鍵？', options: ['野生動物保育法只規範獵人和商業業者，戶外活動者不受影響', '在山區餵食野生動物是友善自然的行為', '擅自餵食保育類野生動物、採集特定植物（如台灣一葉蘭）、干擾動物繁殖行為均可能觸犯野生動物保育法，面臨刑事責任；此外，在山區製造噪音（如無人機聲音）也可能影響野生動物行為而構成干擾', '在台灣遇到熊應主動接近拍照是正確的戶外行為'], answer: 2, points: 3, isCore: true },
+  ],
+
+  personalityTypes: [
+    { id: 'guardian',  label: '戶外安全守護者', icon: '🛡️', desc: '你的安全知識全面且系統化，已超越個人安全的層次，具備帶領和保護他人的能力。你了解風險的多維性，能在壓力下做出正確判斷，是隊伍中最重要的安全資產。這是測驗中頂端的15%。', minScore: 105, maxScore: 130 },
+    { id: 'practitioner', label: '謹慎型實踐者', icon: '✅', desc: '你具備扎實的安全基礎，在大多數常見情境中能做出正確判斷。你的安全意識已超越大多數同類型活動者，繼續深化弱項維度（通常是法規常識或天氣判讀），能讓你的安全能力更加全面。', minScore: 82, maxScore: 104 },
+    { id: 'awakening', label: '風險意識覺醒者', icon: '⚡', desc: '你已開始認真看待戶外安全，對主要風險有基本認識。你的判斷在熟悉的環境中通常正確，但在新情境或極端條件下可能面臨知識缺口。有針對性地補強弱項維度，能快速提升整體安全水準。', minScore: 59, maxScore: 81 },
+    { id: 'building',  label: '安全素養建立中', icon: '🌱', desc: '你完成這份測驗是重要的自我認識步驟。你目前的安全知識有幾個重要缺口，建議在下次戶外活動前接受正式的急救或安全訓練，這可能是你做過最重要的一項準備。', minScore: 0, maxScore: 58 },
+  ],
+
+  getBiasAnalysis: (scores) => {
+    const ra  = scores['risk_assessment'] ?? 0
+    const fa  = scores['first_aid']       ?? 0
+    const eq  = scores['equipment']       ?? 0
+    const wx  = scores['weather']         ?? 0
+    const em  = scores['emergency']       ?? 0
+    const reg = scores['regulations']     ?? 0
+    const vals = [ra, fa, eq, wx, em, reg]
+    const minVal = Math.min(...vals)
+
+    if (minVal >= 70) return {
+      label: '全方位安全高手',
+      desc: '你在六個安全維度都保持高水準，代表你已建立系統性的戶外安全素養。你的知識廣度讓你能在不熟悉的環境中快速評估風險，是你隊伍的最強安全資產。',
+      immediate: ['考取 WFA（荒野急救）或 WAFA（荒野進階急救）認證，強化急救技術的實操能力', '開始帶領初學者，把你的安全知識傳承出去', '建立個人的安全事件回顧日誌，持續精進判斷力'],
+      future: ['考取戶外教育或嚮導相關認證（體育署戶外教育人員/NOLS/Outward Bound）', '研究事故案例分析，建立更全面的風險預測能力', '成為你所在運動社群的安全文化推動者'],
+    }
+
+    if (fa < 55) return {
+      label: '急救知識缺口警示',
+      desc: '你的急救知識得分低於安全基準。戶外急救能力是所有安全維度中最可能直接影響生死的技能——當其他準備都就位，但急救知識缺乏時，任何意外都可能演變成悲劇。',
+      immediate: ['⚠️ 在下次戶外活動前，完成一門急救訓練課程（台灣急救訓練/WFA/WAFA）', '購買並閱讀一本戶外急救手冊，熟悉 DR. ABC 評估流程', '向你常去的戶外活動計畫中加入急救包，並確保你知道每樣東西的用途'],
+      future: ['取得 WFA（荒野急救員）認證——這是戶外活動者最實用的急救資格', '每年更新急救知識，急救指南每5年更新一次', '邀請你的常規隊友一起參加急救課程，提升整個團隊的應急能力'],
+    }
+
+    if (ra < 55) return {
+      label: '風險評估能力待強化',
+      desc: '你的風險評估得分顯示在 GO/NO-GO 決策和風險系統化分析上有重要缺口。風險評估是所有安全決策的起點——即使急救知識精湛，如果無法識別和避免風險，就永遠在「事後救援」而非「事前預防」。',
+      immediate: ['開始使用「行程計畫書」框架，強迫自己在出發前系統思考所有風險', '學習風險矩陣工具，在下一次活動規劃中試用', '和有經驗的嚮導或教練討論你的 GO/NO-GO 決策框架'],
+      future: ['參加戶外領袖課程（如 NOLS Leadership）系統學習風險管理', '建立個人的「Lessons Learned」資料庫，記錄每次你差點做出錯誤決定的案例', '研究台灣山難事故報告，從真實案例中學習風險評估'],
+    }
+
+    if (wx < 55) return {
+      label: '天氣判讀需要加強',
+      desc: '天氣是台灣戶外活動最難以控制的風險因素。你在天氣判讀上的缺口，特別是在台灣特有的午後雷陣雨、颱風外圍環流和湧浪判斷上，是你目前最優先的學習方向。',
+      immediate: ['每次活動前至少查看三個天氣資訊來源（氣象署 + 山頂氣象站 + 在地嚮導）', '學習辨識積雨雲（Cumulonimbus）的形成特徵，這是雷陣雨的前兆', '在你常去的活動地點建立「天氣模式筆記」，記錄在地氣候規律'],
+      future: ['參加氣象讀圖課程或在線學習（台灣中央氣象署有免費資源）', '學習浪況預報讀取（Surf-Forecast/Windguru），理解湧浪週期和方向', '考取相關認證課程中包含天氣判讀的項目（如 ASI 風帆教練/IKO 風箏教練）'],
+    }
+
+    return {
+      label: '均衡發展中的安全實踐者',
+      desc: '你在各個安全維度都有基礎，但尚未建立系統性的安全知識體系。戶外安全的提升有明確的優先順序：急救 > 風險評估 > 裝備知識 > 天氣判讀 > 緊急處置 > 法規。',
+      immediate: ['找出你得分最低的維度，制定30天的專項學習計畫', '報名一門戶外安全相關課程（急救/嚮導訓練/水上安全）', '加入戶外安全社群或跟隨有認證的嚮導活動，從實踐中學習'],
+      future: ['系統完成WFA或等級相當的急救認證', '在你最常從事的活動類型中，取得相關的安全認證（PADI/IKO/嚮導證）', '建立自己的安全知識更新習慣，每年複習核心安全知識'],
+    }
+  },
+
+  painPoints: [
+    { icon: '⛅', text: '你判斷得出什麼天氣可以出發、什麼情況必須放棄嗎？' },
+    { icon: '🎒', text: '你帶的裝備真的適合你要做的活動嗎？' },
+    { icon: '🚨', text: '當意外發生時，你知道第一時間要做什麼嗎？' },
+  ],
+
+  howItWorks: [
+    { icon: '▶️', title: '選擇你的活動類型', desc: '水上運動、登山、溯溪或攀岩，測驗結果依你的活動類型個人化' },
+    { icon: '📝', title: '完成六大維度測試', desc: '10分鐘，涵蓋風險評估、急救知識、裝備判斷、天氣判讀、緊急處置、法規常識' },
+    { icon: '📊', title: '獲得個人化OSQ安全報告', desc: '即時獲得OSQ安全力指數，解鎖台灣在地化10,000字深度分析報告' },
+  ],
+}
