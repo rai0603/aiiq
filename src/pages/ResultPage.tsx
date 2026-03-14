@@ -370,6 +370,230 @@ function AiiqPaidReport({ result, dimensions }: { result: TestResult; dimensions
   )
 }
 
+// EQ+-specific paid report
+function EqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+
+  const dimContent: Record<string, { high: DimAnalysis; low: DimAnalysis }> = {
+    opportunity: {
+      high: {
+        analysis: '你的機會識別能力屬於頂尖水準。你能在日常對話和市場觀察中自動啟動「問題拆解模式」，評估問題規模、現有替代方案的缺口和支付意願。這種習慣性的市場嗅覺讓你能看到別人忽略的機會窗口。',
+        tips: [
+          '建立「機會日誌」：記錄每個你發現的市場缺口，每月回顧哪些已被驗證或否定',
+          '深入學習Gartner技術成熟度曲線，系統追蹤新興技術進入「實用期」的時機',
+          '研究10個你欽佩的創業案例，分析他們的機會識別框架和切入點選擇邏輯',
+        ],
+        roles: '產品策略師、風險投資人（VC Analyst）、創業顧問、商業模式創新負責人、企業創新部門主管',
+      },
+      low: {
+        analysis: '機會識別是你最需要強化的創業核心能力。真正的機會不會自己跑來找你——它藏在用戶的抱怨中、市場的空白處、以及技術趨勢與人類需求的交匯點。培養機會識別的能力，從養成「問題拆解」的習慣開始。',
+        tips: [
+          '本週開始「問題日誌」：每天記錄3個讓你說「為什麼沒有更好的解決方案？」的時刻',
+          '閱讀《Zero to One》（Peter Thiel）和《Jobs to be Done》（Clayton Christensen），建立系統性的機會框架',
+          '加入你目標市場的用戶社群（Reddit/Facebook群組），每天花15分鐘閱讀真實的用戶痛點',
+        ],
+        roles: '建立機會識別能力後，對任何希望在職場中創新、或準備創業的人都有直接價值',
+      },
+    },
+    risk_tolerance: {
+      high: {
+        analysis: '你的風險承受能力是創業者中的稀缺優勢。你能理性評估風險、設定決策截止日期，並在不確定性中果斷行動。你知道如何區分「必要的不確定性風險」和「可以降低的風險」，這讓你能在正確的時機採取大膽行動。',
+        tips: [
+          '建立「風險矩陣」習慣：對每個重大決策評估影響力×可能性，確保風險承受有系統依據',
+          '研究反稀釋條款、清算優先權等融資條款，確保在融資談判中能做出有依據的決策',
+          '練習「預驗屍（Pre-mortem）」：在行動前想像最壞情境，識別可以提前預防的風險',
+        ],
+        roles: '創業投資人、危機管理顧問、創業者（各階段）、企業戰略主管、新事業開發負責人',
+      },
+      low: {
+        analysis: '風險承受能力是你最需要突破的創業瓶頸。過度謹慎在創業中是一種隱性成本——每次等待「更好的時機」，機會窗口都在關閉。你需要學習如何在「夠好的資訊」下做出決策，而非等待不可能出現的完全確定性。',
+        tips: [
+          '練習「70%原則」：有70%的資訊就行動，後30%在行動中獲取',
+          '閱讀《Thinking in Bets》（Annie Duke），學習如何在不確定性下做出高品質決策',
+          '做一個「可承受損失」的小實驗：投入你輸得起的時間/金錢，從行動中學習決策',
+        ],
+        roles: '強化風險承受能力後，對任何面對組織不確定性的管理者、或準備走出舒適圈的工作者都有直接幫助',
+      },
+    },
+    validation: {
+      high: {
+        analysis: '你的快速驗證能力是精實創業的核心武器。你知道如何用最小成本測試最重要的假設，如何設計有效的用戶訪談，以及如何解讀真實的市場訊號。這讓你能在燒掉大量資源前就識別出哪些方向值得全力押注。',
+        tips: [
+          '建立「驗證工具箱」：熟練掌握假門測試、Wizard of Oz MVP、Concierge MVP等不同場景的驗證方法',
+          '研究《The Lean Startup》的「創新核算（Innovation Accounting）」框架，建立可量化的驗證指標',
+          '在每個新假設啟動前，先寫下「若此假設為真/假，我期望看到的具體指標是什麼」',
+        ],
+        roles: 'Product Manager（PM）、成長駭客（Growth Hacker）、UX研究員、精實創業顧問、產品策略師',
+      },
+      low: {
+        analysis: '快速驗證能力是避免「建造無人問津的產品」的最重要防線。很多失敗的新創不是因為執行力差，而是因為在錯誤的假設上執行得太好。學會在行動前先用最小成本驗證假設，能讓你的每一步都走得更有把握。',
+        tips: [
+          '本週為你最重要的商業假設設計一個假門測試：建立登陸頁，設定轉換率目標，收集真實用戶回饋',
+          '閱讀《The Mom Test》（Rob Fitzpatrick），學習如何做出能獲取真實訊號的用戶訪談',
+          '設定「驗證優先」規則：每個需要超過2週開發的功能，先用紙原型或模擬方式驗證需求',
+        ],
+        roles: '培養快速驗證能力後，對Product Manager、創業者、企業內創業（Intrapreneurship）負責人都有直接價值',
+      },
+    },
+    resources: {
+      high: {
+        analysis: '你的資源整合能力讓你能在資源匱乏的情況下取得超乎比例的成果。你知道如何識別手邊的資產（人脈、技能、信息），如何建立對雙方都有價值的合作關係，以及如何讓有限資源產生最大的槓桿效果。',
+        tips: [
+          '建立你的「資源地圖」：列出你的前50個最有價值的人脈，以及每個人能提供什麼幫助',
+          '學習股份激勵機制的設計：顧問股份（0.1-0.5%）、員工股份、戰略合作股份的正確比例和結構',
+          '研究「策略合作框架」：學習如何識別雙方的非對稱優勢，設計雙贏的合作結構',
+        ],
+        roles: '商業發展（BD）主管、創投合夥人、企業聯盟策略主管、創業加速器導師、企業創新主管',
+      },
+      low: {
+        analysis: '資源整合能力是在資源有限時取得不對稱優勢的關鍵。很多創業者把「沒有資源」當成不行動的理由，但頂尖創業者知道：先行動，資源自然會被吸引而來。從你現在擁有的開始，而非等待你認為需要的。',
+        tips: [
+          '列出你現在真正擁有的資源：你的技能、你的人脈、你的知識、你的信用——這些都是資產',
+          '本週主動找一個你需要的資源的持有者，思考你能提供什麼對他們有價值的東西，設計一個互利的合作提案',
+          '閱讀《Effectuation》或相關創業效果邏輯研究，學習如何從已有資源出發創造機會',
+        ],
+        roles: '提升資源整合能力後，對任何需要在資源限制下達成目標的專案負責人、創業者、BD主管都有直接幫助',
+      },
+    },
+    resilience: {
+      high: {
+        analysis: '你的心理韌性是創業長跑的核心引擎。你能在挫折中提取學習而非陷入自我否定，能在壓力下維持決策品質，也知道如何建立可持續的工作節奏。這種韌性讓你在別人放棄的時候仍然能繼續前進。',
+        tips: [
+          '建立「韌性日誌」：每週記錄一個本週最困難的時刻和你的應對方式，追蹤自己的成長模式',
+          '研究頂尖創業者的心理管理策略：閱讀《Shoe Dog》（Phil Knight）或《The Hard Thing About Hard Things》（Ben Horowitz）',
+          '建立「倦怠早期預警系統」：定義3個讓你知道自己快燃燒殆盡的個人信號，並設立恢復協議',
+        ],
+        roles: '連續創業者、危機領導者、組織韌性顧問、心理健康創業領域、高壓職位領導人（CEO/COO）',
+      },
+      low: {
+        analysis: '韌性是創業馬拉松最被低估的核心能力。技術可以外包，資金可以融資，但心理韌性只能靠自己建立。在創業路上，挫折不是例外而是常態——建立系統性的心理韌性，才能在不可避免的低潮中繼續前進。',
+        tips: [
+          '立刻建立「生理基礎」：這週確保每天7小時睡眠和3次運動，這是所有其他韌性建設的前提',
+          '閱讀Carol Dweck的《Mindset》，建立成長型思維框架，開始把挫折解讀為學習訊號而非失敗定義',
+          '找一個可以坦誠分享困難的創業同伴或導師，建立定期交流的支持系統',
+        ],
+        roles: '提升韌性後，對任何高壓職業（創業者、管理者、醫療工作者、教師）都有直接且深遠的價值',
+      },
+    },
+    market: {
+      high: {
+        analysis: '你的市場直覺讓你能看到市場中別人忽略的訊號。你知道如何定義精準的ICP、如何設計健康的定價策略、如何識別真正的PMF信號。這種能力讓你在進入市場時能做出更精準的戰略選擇。',
+        tips: [
+          '建立「市場情報系統」：定期追蹤你目標市場的3個核心指標，以及2個你認為是領先指標的觀察點',
+          '深入研究你產品的單位經濟學（LTV/CAC/Churn Rate），找到讓整體指標最優化的槓桿點',
+          '研究「網絡效應」的不同類型（直接/間接/數據/社交），評估你的產品是否有建立護城河的機會',
+        ],
+        roles: '市場策略主管、成長駭客（Growth Hacker）、商業模式顧問、VC市場分析師、品牌策略師',
+      },
+      low: {
+        analysis: '市場直覺是把創業想法轉化為可持續商業模式的關鍵橋樑。很多好的想法之所以失敗，不是因為產品不好，而是因為沒有找到正確的市場切入點、定價策略和增長機制。培養市場直覺，從深入了解你的潛在用戶開始。',
+        tips: [
+          '立刻計算你的目標產品的LTV和CAC：若LTV/CAC<3，需要重新思考商業模式或降低獲客成本',
+          '為你的產品定義一個極其具體的ICP：不是「中小企業」，而是「台北、50-200人、SaaS公司、有遠距工作需求的HR主管」',
+          '研究一個你欽佩的B2C或B2B成功案例的GTM策略：他們的第一批客戶從哪裡來？如何轉換？如何保留？',
+        ],
+        roles: '提升市場直覺後，對Product Manager、業務主管、創業者、以及任何需要讓產品/服務找到市場的人都有直接價值',
+      },
+    },
+  }
+
+  return (
+    <div className="card-glass rounded-3xl p-8 space-y-6">
+      <h3 className="font-bold text-xl mb-2">🚀 創業思維個人化分析</h3>
+
+      {/* 偏態分析 */}
+      {result.biasAnalysis && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📊</span>
+            <span className="font-semibold text-white">創業思維偏態分析</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto bg-amber-500/20 text-amber-300">
+              {result.biasAnalysis.label}
+            </span>
+          </div>
+          <p className="text-sm text-gray-300 leading-relaxed">{result.biasAnalysis.desc}</p>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-green-400">⚡</span>
+              <span className="text-xs font-semibold text-green-400 uppercase tracking-wide">立即可行的行動</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.immediate.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-green-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-blue-400">🎯</span>
+              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">未來提升方向與目標</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.future.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-blue-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+
+      {/* 各維度分析 */}
+      <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+        {dimensions.map(dim => {
+          const pct = result.dimensionScores[dim.id]?.percent ?? 0
+          const isHigh = pct >= 70
+          const level = pct >= 80 ? '優秀' : pct >= 60 ? '良好' : '需要加強'
+          const content = dimContent[dim.id]
+          const dimData: DimAnalysis = content
+            ? (isHigh ? content.high : content.low)
+            : {
+                analysis: `你在${dim.label}方面的表現${isHigh ? '良好' : '有提升空間'}。持續練習與學習，你將能進一步提升這個維度的能力。`,
+                tips: ['持續實踐相關技能', '尋找相關學習資源', '在實際情境中應用'],
+                roles: '根據你的行業，此能力有廣泛的應用場景',
+              }
+
+          return (
+            <div key={dim.id} className="bg-white/5 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>{dim.icon}</span>
+                <span className="font-semibold text-white">{dim.label}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${dim.color}20`, color: dim.color }}>
+                  {level}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 ml-auto">
+                  超越 {dimToPercentile(pct)}% 受測者
+                </span>
+              </div>
+              <p className="text-gray-300">{dimData.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">提升建議</div>
+                <ol className="space-y-1 list-none">
+                  {dimData.tips.map((tip, idx) => (
+                    <li key={idx} className="flex gap-2">
+                      <span className="shrink-0 font-bold" style={{ color: dim.color }}>{idx + 1}.</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="bg-white/5 rounded-lg px-3 py-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">適合職位　</span>
+                <span className="text-gray-300 text-xs">{dimData.roles}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // FQ-specific paid report
 function FqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
   type DimAnalysis = { analysis: string; tips: string[]; roles: string }
@@ -745,6 +969,8 @@ export default function ResultPage() {
             <AiiqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'fq' ? (
             <FqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : testId === 'eq' ? (
+            <EqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : (
             <div className="card-glass rounded-3xl p-8 text-center space-y-4">
               <div className="text-4xl">🚧</div>
