@@ -2,6 +2,7 @@ import aiiq from './aiiq'
 import lq from './lq'
 import fq from './fq'
 import eq from './eq'
+import smq from './smq'
 import outdoor from './outdoor'
 import cross from './cross'
 import parent from './parent'
@@ -13,7 +14,7 @@ import { buildAiiqQuestions } from './aiiq'
 export type { TestConfig, Question, DimensionConfig }
 export { buildAiiqQuestions }
 
-export const ALL_TESTS: TestConfig[] = [aiiq, lq, fq, eq, outdoor, cross, parent, social, health]
+export const ALL_TESTS: TestConfig[] = [aiiq, lq, fq, eq, smq, outdoor, cross, parent, social, health]
 export const TEST_MAP: Record<string, TestConfig> = Object.fromEntries(ALL_TESTS.map(t => [t.id, t]))
 
 export function getTest(id: string): TestConfig | undefined {

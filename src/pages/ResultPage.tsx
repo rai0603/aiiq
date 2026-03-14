@@ -818,6 +818,230 @@ function FqPaidReport({ result, dimensions }: { result: TestResult; dimensions: 
   )
 }
 
+// SMQ-specific paid report
+function SmqPaidReport({ result, dimensions }: { result: TestResult; dimensions: DimensionConfig[] }) {
+  type DimAnalysis = { analysis: string; tips: string[]; roles: string }
+
+  const dimContent: Record<string, { high: DimAnalysis; low: DimAnalysis }> = {
+    content_strategy: {
+      high: {
+        analysis: '你是內容策略的高手，能夠打造系統化的內容引擎。繼續精進可下載資源、郵件序列等高轉換內容形式，並學習AI輔助內容生產，把你的產量擴大10倍。',
+        tips: [
+          '建立「內容資產組合」：每季製作1份高品質可下載資源（白皮書/模板），作為Email獲取的誘因',
+          '嘗試「內容拆解工作流」：一篇長文 → 5則短文 → 10則社群貼文 → 1支短影音，最大化每個創作的ROI',
+          '導入AI輔助內容生產流程（如Claude + Notion），把高品質產出速度提升3-5倍',
+        ],
+        roles: '適合角色：內容行銷專員、品牌部落客、社群編輯',
+      },
+      low: {
+        analysis: '內容策略是你需要優先強化的基礎。建議從建立「內容主題柱」開始，確定3個核心主題，每個主題製作5篇深度文章，建立你的第一個內容資產組合。',
+        tips: [
+          '本週完成一件事：為你的品牌定義3個「內容主題柱」，每個柱子涵蓋你最了解且受眾最需要的話題',
+          '閱讀《Content Inc.》（Joe Pulizzi）或《他們，不是從零開始》，建立內容行銷的系統性思維',
+          '選定1個平台，連續30天每天發布1則有價值的內容，從執行中建立節奏感和直覺',
+        ],
+        roles: '適合角色：內容行銷專員、品牌部落客、社群編輯',
+      },
+    },
+    data_analysis: {
+      high: {
+        analysis: '你的數據分析能力讓你能做出有依據的行銷決策。進階目標：掌握多渠道歸因分析，學習用數據建立預測性行銷模型。',
+        tips: [
+          '建立「行銷儀表板」：在GA4或Looker Studio整合所有渠道數據，設定週報自動寄送，養成每週數據復盤習慣',
+          '深入學習「多點觸控歸因」模型——了解線性、時間衰減、數據驅動歸因的差異，優化預算分配決策',
+          '嘗試用Python或試算表建立「行銷預測模型」：根據歷史數據預測不同預算下的轉換量',
+        ],
+        roles: '適合角色：績效行銷專員、電商經理、行銷分析師',
+      },
+      low: {
+        analysis: '數據分析是你最需要補強的技能。從最基礎開始：設定GA4追蹤、每週記錄3個關鍵指標，養成用數字驗證每個行銷決策的習慣。',
+        tips: [
+          '今天就做：登入你的平台後台，找到「分析」頁面，記錄這3個數字——觸及人數、互動率、連結點擊數',
+          '安裝GA4並設定基本目標追蹤：至少追蹤「表單提交」或「加入購物車」等轉換事件',
+          '訂閱《Marketing Examples》電子報，每期都有真實案例的數據解讀，從故事中學習數據思維',
+        ],
+        roles: '適合角色：績效行銷專員、電商經理、行銷分析師',
+      },
+    },
+    platform_algo: {
+      high: {
+        analysis: '你深諳各平台算法邏輯，能系統性地擴大有機觸及。建議研究跨平台算法趨勢，成為你所在行業的算法研究專家。',
+        tips: [
+          '建立「算法更新追蹤系統」：追蹤各平台官方新聞中心和頂尖社群行銷KOL，第一時間掌握規則變化',
+          '針對你最重要的1個平台，設計「算法實驗」：每月測試1個算法假設（例如：留言數量是否影響分發），記錄結果',
+          '撰寫你的算法研究心得並公開分享——這本身就是建立Thought Leadership的最佳行動',
+        ],
+        roles: '適合角色：社群媒體管理員、成長駭客、內容創作者',
+      },
+      low: {
+        analysis: '算法理解薄弱會讓你的內容事倍功半。立即行動：選定1個主要平台，深入研究其2025年最新算法變化，把算法知識直接應用到你的下一篇內容。',
+        tips: [
+          '選定你的主力平台（Instagram/LinkedIn/TikTok），花30分鐘閱讀該平台在2025年的算法更新說明',
+          '針對你的下一篇貼文，刻意應用1個算法技巧（如Instagram：前3秒Hook + 引導留言的問句結尾）',
+          '追蹤台灣社群行銷專家的帳號（找出在你目標平台有持續高互動的創作者），觀察他們的內容模式',
+        ],
+        roles: '適合角色：社群媒體管理員、成長駭客、內容創作者',
+      },
+    },
+    audience_insight: {
+      high: {
+        analysis: '你對受眾有深刻理解，這是所有行銷策略的基礎。進一步建立詳細的Persona文件，並與銷售團隊共享受眾洞察，讓行銷和銷售真正協同。',
+        tips: [
+          '製作正式的「Persona文件」：包含人口統計、心理統計、常用平台、購買疑慮、決策觸發點，與整個團隊共享',
+          '建立「客戶之聲（VoC）系統」：定期收集客戶評論、客服紀錄、銷售通話筆記，提取真實語言用於內容和廣告文案',
+          '每季進行3-5次深度客戶訪談，持續更新你的受眾理解，確保不依賴過時的假設',
+        ],
+        roles: '適合角色：行銷策略師、CRM專員、市場研究員',
+      },
+      low: {
+        analysis: '受眾理解不足會讓所有行銷努力方向偏差。今天就做：訪談3-5位現有客戶，記錄他們購買前的真實疑慮和決策過程——這比任何工具都有效。',
+        tips: [
+          '本週聯繫3位現有客戶或潛在用戶，問他們1個問題：「在選擇我們之前，你最大的疑慮是什麼？」',
+          '進入你目標受眾聚集的線上社群（Facebook社團/Reddit/PTT），花20分鐘閱讀真實的討論，記錄他們使用的語言和表達的問題',
+          '閱讀《The Mom Test》（Rob Fitzpatrick），學習如何問出真實答案而非社交性回應的用戶訪談技巧',
+        ],
+        roles: '適合角色：行銷策略師、CRM專員、市場研究員',
+      },
+    },
+    brand_voice: {
+      high: {
+        analysis: '你建立了強大的品牌識別度。下一步：制定正式的品牌危機應對SOP，並開始建立Thought Leadership內容系列，讓品牌成為行業的聲音。',
+        tips: [
+          '制定正式的「品牌危機應對SOP」：定義危機等級、回應時間標準、發言人授權、以及各平台的應對腳本',
+          '啟動「Thought Leadership內容計劃」：每月發布1篇深度行業觀察，建立品牌的專家形象和話語權',
+          '建立「品牌聲音指南（Brand Voice Guide）」文件，詳細定義語氣、用詞偏好、禁忌，讓整個團隊的溝通保持高度一致',
+        ],
+        roles: '適合角色：品牌經理、公關專員、內容總監',
+      },
+      low: {
+        analysis: '品牌聲量薄弱讓你的行銷缺乏辨識度。立即制定一份品牌聲音指南（一頁就夠），定義你的品牌個性、語氣和禁忌用語，讓所有內容保持一致。',
+        tips: [
+          '今天完成一頁「品牌聲音卡」：列出品牌個性3個形容詞、語氣（正式/輕鬆/專業/親切）、3個你喜歡的品牌參考範例',
+          '回顧你過去30則社群貼文，評估語氣是否一致——找出最能代表你品牌形象的3則，作為未來的標準範本',
+          '研究1個你欣賞的品牌的全渠道溝通，分析其在Instagram/LinkedIn/客服/官網上如何保持語氣一致但又適應各平台',
+        ],
+        roles: '適合角色：品牌經理、公關專員、內容總監',
+      },
+    },
+    ad_placement: {
+      high: {
+        analysis: '你的廣告投放能力是你的最大商業武器。進階挑戰：掌握程序化廣告（DSP）和進階受眾建模，把你的廣告效益再提升一個層次。',
+        tips: [
+          '建立系統化的「創意測試框架」：每個廣告組同時跑3-5個素材變體，設定清晰的停損指標（CPM/CTR/CPA閾值），讓數據決定存活',
+          '深入研究Meta Advantage+廣告活動和Google Performance Max，理解機器學習廣告的正確設定和優化方式',
+          '學習「廣告歸因建模」：了解如何在iOS隱私政策後的環境中，結合Conversion API + MMM（媒體組合建模）衡量真實廣告效果',
+        ],
+        roles: '適合角色：廣告投放專員、代理商AM、電商行銷人',
+      },
+      low: {
+        analysis: '廣告投放是把行銷知識直接轉化為商業結果的關鍵技能。建議從NT$5,000的小預算開始系統測試，重點學習：廣告架構設定、像素安裝、以及如何閱讀廣告後台的核心指標。',
+        tips: [
+          '申請Meta Business Manager帳號，完成基本設定：像素安裝 + 1個轉換事件追蹤（如：填寫表單）',
+          '用NT$5,000做你的第一個廣告實驗：選定1個目標（流量或轉換）、1個受眾、2個不同素材，跑7天後比較結果',
+          '完成Meta Blueprint免費課程的「廣告投放基礎」模組——有中文版，約3小時，是系統學習Meta廣告的最佳起點',
+        ],
+        roles: '適合角色：廣告投放專員、代理商AM、電商行銷人',
+      },
+    },
+  }
+
+  return (
+    <div className="card-glass rounded-3xl p-8 space-y-6">
+      <h3 className="font-bold text-xl mb-2">📱 社群行銷個人化分析</h3>
+
+      {/* 偏態分析 */}
+      {result.biasAnalysis && (
+        <div className="bg-pink-500/10 border border-pink-500/30 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📊</span>
+            <span className="font-semibold text-white">行銷能力偏態分析</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto bg-pink-500/20 text-pink-300">
+              {result.biasAnalysis.label}
+            </span>
+          </div>
+          <p className="text-sm text-gray-300 leading-relaxed">{result.biasAnalysis.desc}</p>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-green-400">⚡</span>
+              <span className="text-xs font-semibold text-green-400 uppercase tracking-wide">立即可行的行動</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.immediate.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-green-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-purple-400">🎯</span>
+              <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">未來提升方向與目標</span>
+            </div>
+            <ol className="space-y-1.5">
+              {result.biasAnalysis.future.map((item: string, idx: number) => (
+                <li key={idx} className="flex gap-2 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold text-purple-400">{idx + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
+
+      {/* 各維度分析 */}
+      <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+        {dimensions.map(dim => {
+          const pct = result.dimensionScores[dim.id]?.percent ?? 0
+          const isHigh = pct >= 70
+          const level = pct >= 80 ? '優秀' : pct >= 60 ? '良好' : '需要加強'
+          const content = dimContent[dim.id]
+          const dimData: DimAnalysis = content
+            ? (isHigh ? content.high : content.low)
+            : {
+                analysis: `你在${dim.label}方面的表現${isHigh ? '良好' : '有提升空間'}。持續練習與學習，你將能進一步提升這個維度的能力。`,
+                tips: ['持續實踐相關技能', '尋找相關學習資源', '在實際情境中應用'],
+                roles: '根據你的行業，此能力有廣泛的應用場景',
+              }
+
+          return (
+            <div key={dim.id} className="bg-white/5 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span>{dim.icon}</span>
+                <span className="font-semibold text-white">{dim.label}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${dim.color}20`, color: dim.color }}>
+                  {level}
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 ml-auto">
+                  超越 {dimToPercentile(pct)}% 受測者
+                </span>
+              </div>
+              <p className="text-gray-300">{dimData.analysis}</p>
+              <div>
+                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">提升建議</div>
+                <ol className="space-y-1 list-none">
+                  {dimData.tips.map((tip, idx) => (
+                    <li key={idx} className="flex gap-2">
+                      <span className="shrink-0 font-bold" style={{ color: dim.color }}>{idx + 1}.</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="bg-white/5 rounded-lg px-3 py-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">適合角色　</span>
+                <span className="text-gray-300 text-xs">{dimData.roles}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ResultPage() {
   const { testId } = useParams<{ testId: string }>()
   const navigate = useNavigate()
@@ -971,6 +1195,8 @@ export default function ResultPage() {
             <FqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : testId === 'eq' ? (
             <EqPaidReport result={result} dimensions={testConfig.dimensions} />
+          ) : testId === 'smq' ? (
+            <SmqPaidReport result={result} dimensions={testConfig.dimensions} />
           ) : (
             <div className="card-glass rounded-3xl p-8 text-center space-y-4">
               <div className="text-4xl">🚧</div>
