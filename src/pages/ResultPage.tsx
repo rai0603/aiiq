@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getTest } from '../data/tests'
 import type { DimensionConfig } from '../data/tests'
 import type { TestResult } from '../utils/scoring'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 /** 根據維度百分比（0-100）估算相對百分位，假設平均值 55，SD 20 */
 function dimToPercentile(pct: number): number {
@@ -1309,6 +1311,7 @@ function SmqPaidReport({ result, dimensions }: { result: TestResult; dimensions:
 export default function ResultPage() {
   const { testId } = useParams<{ testId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [result, setResult] = useState<TestResult | null>(null)
   const [unlocked, setUnlocked] = useState(false)
   const [counting, setCounting] = useState(0)
@@ -1339,6 +1342,25 @@ export default function ResultPage() {
     return () => clearInterval(timer)
   }, [navigate, testId, testConfig])
 
+  // Save result to Supabase if user is logged in
+  useEffect(() => {
+    if (!result || !user || !testId) return
+    const save = async () => {
+      await supabase.from('test_results').upsert({
+        user_id: user.id,
+        test_id: testId,
+        score: result.score,
+        percentile: result.percentile,
+        dimension_scores: result.dimensionScores,
+        answers: result.answers,
+        personality_type_id: result.personalityType.id,
+        time_taken: result.timeTaken,
+        unlocked: false,
+      })
+    }
+    save()
+  }, [result, user, testId])
+
   if (!result || !testConfig) return null
 
   const dimScores = result.dimensionScores
@@ -1360,6 +1382,22 @@ export default function ResultPage() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-4 py-10 space-y-8">
+
+        {/* GUEST SAVE BANNER */}
+        {!user && (
+          <div className="flex items-center justify-between gap-3 bg-blue-500/10 border border-blue-500/25 rounded-2xl px-5 py-3">
+            <div className="flex items-center gap-2 text-sm text-blue-300">
+              <span>💾</span>
+              <span>登入後可保存此結果，隨時查看你的報告</span>
+            </div>
+            <button
+              onClick={() => navigate('/auth')}
+              className="shrink-0 text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/35 text-blue-300 border border-blue-500/30 transition-all font-medium"
+            >
+              登入 / 註冊
+            </button>
+          </div>
+        )}
 
         {/* SCORE HERO */}
         <div className="card-glass rounded-3xl p-8 text-center relative overflow-hidden">

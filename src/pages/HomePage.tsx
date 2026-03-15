@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { ALL_TESTS } from '../data/tests'
+import { useAuth } from '../contexts/AuthContext'
 
 function DifficultyStars({ level }: { level: number }) {
   return (
@@ -13,6 +14,7 @@ function DifficultyStars({ level }: { level: number }) {
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-[#05081a] text-white overflow-x-hidden">
@@ -24,12 +26,32 @@ export default function HomePage() {
           <a href="#tests" className="hover:text-white transition-colors">所有測驗</a>
           <a href="#pricing" className="hover:text-white transition-colors">定價</a>
         </div>
-        <button
-          onClick={() => navigate('/aiiq')}
-          className="btn-primary px-5 py-2 rounded-full text-sm font-semibold text-white"
-        >
-          免費開始 →
-        </button>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border border-white/15 bg-white/5 hover:bg-white/10 transition-all"
+            >
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-[10px]">
+                {user.email?.[0].toUpperCase() ?? 'U'}
+              </div>
+              我的報告
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className="px-4 py-2 rounded-full text-sm font-semibold border border-white/15 text-gray-300 hover:text-white hover:border-white/30 transition-all"
+            >
+              登入
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/aiiq')}
+            className="btn-primary px-5 py-2 rounded-full text-sm font-semibold text-white"
+          >
+            免費開始 →
+          </button>
+        </div>
       </nav>
 
       {/* HERO */}
