@@ -21,7 +21,7 @@ function dimToPercentile(pct: number): number {
   return Math.round(Math.min(99, Math.max(1, perc * 100)))
 }
 
-const SITE_URL = 'https://aiiq.app'
+const SITE_URL = 'https://iqai-5zv.pages.dev'
 
 function ShareButtons({ result, testName, scoreLabel }: { result: TestResult; testName: string; scoreLabel: string }) {
   const [copied, setCopied] = useState(false)
