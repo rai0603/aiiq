@@ -23,19 +23,18 @@ function dimToPercentile(pct: number): number {
 
 const SITE_URL = 'https://iqai-5zv.pages.dev'
 
-function ShareButtons({ result, testName, scoreLabel }: { result: TestResult; testName: string; scoreLabel: string }) {
+function ShareButtons({ result, testId, testName, scoreLabel }: { result: TestResult; testId: string; testName: string; scoreLabel: string }) {
   const [copied, setCopied] = useState(false)
 
-  const shareText = `🧠 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n\n我的能力類型：${result.personalityType.icon} ${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 ${scoreLabel} → ${SITE_URL}\n#${scoreLabel} #IQSuite #能力測驗`
+  const shareText = `${result.personalityType.icon} 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n\n能力類型：${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 ${scoreLabel} → ${SITE_URL}/${testId}\n#${scoreLabel} #IQSuite #能力測驗`
 
-  const shareToFacebook = async () => {
-    const fbText = `🧠 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n${result.personalityType.icon} 能力類型：${result.personalityType.label}\n\n測測你的 ${scoreLabel} → ${SITE_URL}`
-    try { await navigator.clipboard.writeText(fbText) } catch {}
+  const shareUrl = `${SITE_URL}/share?test=${testId}&name=${encodeURIComponent(scoreLabel)}&score=${result.score}&pct=${result.percentile}&type=${encodeURIComponent(result.personalityType.label)}&icon=${encodeURIComponent(result.personalityType.icon)}`
+
+  const shareToFacebook = () => {
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       '_blank', 'width=600,height=500'
     )
-    setTimeout(() => alert('📋 分享文字已複製到剪貼簿！\n請在 Facebook 貼文框中貼上（Ctrl+V / ⌘+V）'), 500)
   }
 
   const shareToThreads = () => {
@@ -1427,7 +1426,7 @@ export default function ResultPage() {
         </div>
 
         {/* SHARE */}
-        <ShareButtons result={result} testName={testConfig.name} scoreLabel={testConfig.scoreLabel} />
+        <ShareButtons result={result} testId={testId!} testName={testConfig.name} scoreLabel={testConfig.scoreLabel} />
 
         {/* RADAR + DIM SCORES */}
         <div className="grid md:grid-cols-2 gap-6">
