@@ -1,4 +1,4 @@
-export const onRequest: PagesFunction = (context) => {
+export async function onRequest(context: any) {
   const url = new URL(context.request.url)
   const testId = url.searchParams.get('test') || 'aiiq'
   const testName = url.searchParams.get('name') || 'AI-IQ'
@@ -11,28 +11,27 @@ export const onRequest: PagesFunction = (context) => {
   const testUrl = `${siteUrl}/${testId}`
 
   const title = `${icon} 我的${testName}是 ${score} 分！超越了 ${pct}% 的受測者`
-  const description = `能力類型：${type}。你的分數會落在哪裡？免費測驗，即時獲得結果！`
+  const description = `能力類型：${type}。來測測你的分數會落在哪裡？免費測驗，即時獲得結果！`
 
   const html = `<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="${escapeHtml(title)}" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:title" content="${esc(title)}" />
+  <meta property="og:description" content="${esc(description)}" />
   <meta property="og:url" content="${testUrl}" />
-  <meta property="og:image" content="${siteUrl}/og-image.png" />
   <meta property="og:locale" content="zh_TW" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${escapeHtml(title)}" />
-  <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${siteUrl}/og-image.png" />
-  <meta http-equiv="refresh" content="0;url=${testUrl}" />
-  <title>${escapeHtml(title)}</title>
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="${esc(title)}" />
+  <meta name="twitter:description" content="${esc(description)}" />
+  <title>${esc(title)}</title>
+  <script>window.location.replace("${testUrl}")</script>
 </head>
 <body>
-  <p>正在跳轉...</p>
-  <a href="${testUrl}">點此前往測驗</a>
+  <p>${esc(title)}</p>
+  <p>${esc(description)}</p>
+  <a href="${testUrl}">點此前往測驗 →</a>
 </body>
 </html>`
 
@@ -41,6 +40,6 @@ export const onRequest: PagesFunction = (context) => {
   })
 }
 
-function escapeHtml(s: string) {
+function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
