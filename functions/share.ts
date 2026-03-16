@@ -19,6 +19,9 @@ export async function onRequest(context: any) {
   <meta property="og:type" content="website" />
   <meta property="og:title" content="${esc(title)}" />
   <meta property="og:description" content="${esc(description)}" />
+  <meta property="og:image" content="${siteUrl}/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="zh_TW" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="${esc(title)}" />
