@@ -28,11 +28,14 @@ function ShareButtons({ result, testName, scoreLabel }: { result: TestResult; te
 
   const shareText = `🧠 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n\n我的能力類型：${result.personalityType.icon} ${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 ${scoreLabel} → ${SITE_URL}\n#${scoreLabel} #IQSuite #能力測驗`
 
-  const shareToFacebook = () => {
+  const shareToFacebook = async () => {
+    const fbText = `🧠 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n${result.personalityType.icon} 能力類型：${result.personalityType.label}\n\n測測你的 ${scoreLabel} → ${SITE_URL}`
+    try { await navigator.clipboard.writeText(fbText) } catch {}
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent(`我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者 ${result.personalityType.icon} ${result.personalityType.label} — 測測你的 ${scoreLabel} → ${SITE_URL}`)}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}`,
       '_blank', 'width=600,height=500'
     )
+    setTimeout(() => alert('📋 分享文字已複製到剪貼簿！\n請在 Facebook 貼文框中貼上（Ctrl+V / ⌘+V）'), 500)
   }
 
   const shareToThreads = () => {
