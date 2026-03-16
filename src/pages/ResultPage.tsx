@@ -28,7 +28,7 @@ function ShareButtons({ result, testId, testName, scoreLabel }: { result: TestRe
 
   const shareText = `${result.personalityType.icon} 我的 ${scoreLabel} 是 ${result.score} 分！超越全球 ${result.percentile}% 的受測者\n\n能力類型：${result.personalityType.label}\n「${result.personalityType.desc}」\n\n測測你的 ${scoreLabel} → ${SITE_URL}/${testId}\n#${scoreLabel} #IQSuite #能力測驗`
 
-  const shareUrl = `${SITE_URL}/share?test=${testId}&name=${encodeURIComponent(scoreLabel)}&score=${result.score}&pct=${result.percentile}&type=${encodeURIComponent(result.personalityType.label)}&icon=${encodeURIComponent(result.personalityType.icon)}`
+  const shareUrl = `${SITE_URL}/share?test=${testId}&name=${encodeURIComponent(scoreLabel)}&score=${result.score}&pct=${result.percentile}&type=${encodeURIComponent(result.personalityType.label)}`
 
   const shareToFacebook = () => {
     window.open(
